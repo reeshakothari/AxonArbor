@@ -4,6 +4,9 @@
  * Brand tokens. The default Tailwind palette is cleared so only brand colours
  * (black, white, amber and greys derived from black) are available.
  */
+/* Desktop screens tall enough to pin the problem-section story. */
+@custom-variant pin (@media (min-width: 64rem) and (min-height: 40rem));
+
 @theme {
   --color-*: initial;
   --color-transparent: transparent;
