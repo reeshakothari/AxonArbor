@@ -76,7 +76,7 @@
 @keyframes reveal {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(64px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -188,6 +188,274 @@
 .stack:has([data-col="3"]:hover) [data-arc="3"] {
   stroke: var(--color-amber);
   stroke-width: 7;
+}
+
+/* ---------- Heavy motion layer ---------- */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float-y {
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes grid-drift {
+  to {
+    background-position: 28px 28px;
+  }
+}
+
+@keyframes word-in {
+  from {
+    opacity: 0.01;
+    transform: translateY(0.45em);
+  }
+}
+
+@keyframes march {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@keyframes node-drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(7px, -9px);
+  }
+  66% {
+    transform: translate(-6px, 6px);
+  }
+}
+
+@keyframes ping {
+  from {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+@keyframes ripple {
+  from {
+    transform: translate(-50%, -50%) scale(0.35);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes glow {
+  50% {
+    transform: translate(-50%, -50%) scale(1.25);
+    opacity: 0.9;
+  }
+}
+
+@keyframes tilt {
+  to {
+    transform: rotate(-11deg);
+  }
+}
+
+@keyframes drop {
+  from {
+    transform: translateY(-240px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes twig {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+@keyframes zoom-out {
+  from {
+    transform: scale(1.25);
+  }
+}
+
+.dot-grid {
+  background-image: radial-gradient(circle, var(--color-grey-300) 1.2px, transparent 1.6px);
+  background-size: 28px 28px;
+}
+
+.spin-slow,
+.spin-slow-reverse,
+.ping {
+  transform-box: view-box;
+}
+
+.draw .orbit-in {
+  opacity: 0;
+  transition: opacity 1.6s ease 1.4s;
+}
+
+.draw[data-drawn="true"] .orbit-in {
+  opacity: 1;
+}
+
+.balance-beam {
+  transform-box: view-box;
+  transform-origin: 260px 240px;
+}
+
+.branch-twig {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+}
+
+.ripple {
+  position: absolute;
+  aspect-ratio: 1;
+  border: 2px solid var(--color-amber);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+.glow {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: var(--color-amber);
+  opacity: 0.45;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spin-slow {
+    animation: spin 40s linear infinite;
+  }
+
+  .spin-slow-reverse {
+    animation: spin 60s linear infinite reverse;
+  }
+
+  .dot-grid {
+    animation: grid-drift 6s linear infinite;
+  }
+
+  .hero-word {
+    animation: word-in 900ms var(--ease-out-soft) both;
+  }
+
+  .hero-arbor,
+  .legacy-float {
+    animation: float-y 7s ease-in-out infinite;
+  }
+
+  .idle-bob {
+    animation: float-y 5s ease-in-out infinite;
+  }
+
+  .march {
+    animation: march 1.1s linear infinite;
+  }
+
+  .drift-node {
+    animation: node-drift 4s ease-in-out infinite;
+  }
+
+  .ping {
+    animation: ping 2.4s ease-out infinite;
+  }
+
+  .ripple {
+    animation: ripple 3s ease-out infinite;
+  }
+
+  .ripple:nth-of-type(2) {
+    animation-delay: 1s;
+  }
+
+  .ripple:nth-of-type(3) {
+    animation-delay: 2s;
+  }
+
+  .glow {
+    animation: glow 2.2s ease-in-out infinite;
+  }
+
+  .ticker-track-reverse {
+    animation: ticker 50s linear infinite reverse;
+  }
+
+  .ticker:hover .ticker-track-reverse {
+    animation-play-state: paused;
+  }
+
+  @supports (animation-timeline: view()) {
+    .balance-beam {
+      animation: tilt linear both;
+      animation-timeline: --pq;
+      animation-range: cover 30% cover 55%;
+    }
+
+    .balance-box {
+      animation: drop var(--ease-out-soft) both;
+      animation-timeline: --pq;
+    }
+
+    .branch-divider {
+      view-timeline-name: --branch;
+    }
+
+    .branch-line {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: dash linear both;
+      animation-timeline: --branch;
+      animation-range: entry 0% cover 50%;
+    }
+
+    .branch-twig {
+      animation: twig linear both;
+      animation-timeline: --branch;
+      animation-range: entry calc(10% + var(--i) * 8%) cover calc(30% + var(--i) * 5%);
+    }
+
+    .img-reveal img {
+      animation: zoom-out linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal,
+  .ping,
+  .ripple,
+  .glow {
+    display: none;
+  }
 }
 
 @keyframes ticker {

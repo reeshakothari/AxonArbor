@@ -30,7 +30,7 @@ function Node({ cx, cy, r = 4, ms = 0 }: { cx: number; cy: number; r?: number; m
 }
 
 function Accent({ cx, cy, r = 4.5, ms = 0 }: { cx: number; cy: number; r?: number; ms?: number }) {
-  return <circle cx={cx} cy={cy} r={r} data-node style={d(ms)} className="fill-amber" stroke="none" />;
+  return <circle cx={cx} cy={cy} r={r} data-node style={d(ms)} className="breathe fill-amber" stroke="none" />;
 }
 
 /** Many inputs converging into one partner. */

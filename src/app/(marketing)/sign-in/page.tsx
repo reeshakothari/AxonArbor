@@ -1,3 +1,5 @@
+import { Arbor } from "@/components/illustrations/Arbor";
+import { Draw } from "@/components/illustrations/Draw";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/sections/PageHeader";
 import { ButtonLink } from "@/components/ui/Button";
@@ -10,7 +12,14 @@ export const metadata = pageMetadata(signIn.meta);
 export default function SignInPage() {
   return (
     <>
-      <PageHeader {...signIn.header} />
+      <PageHeader
+        {...signIn.header}
+        illustration={
+          <Draw threshold={0.05} className="hero-arbor text-ink">
+            <Arbor className="mx-auto h-72 w-auto" />
+          </Draw>
+        }
+      />
       <Container className="flex flex-wrap items-center gap-8 py-16 sm:py-20">
         <ButtonLink href="/">Back to home</ButtonLink>
         <p className="text-grey-600">

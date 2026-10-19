@@ -38,8 +38,8 @@ export function BeyondTraining({ eyebrow, heading, lede, items }: Props) {
                   0{i + 1}
                 </span>
                 {item.icon && (
-                  <Draw className="hidden shrink-0 text-ink sm:block">
-                    <LineIcon name={item.icon} className="size-14" />
+                  <Draw className="idle-bob hidden shrink-0 text-ink sm:block">
+                    <LineIcon name={item.icon} className="size-20" />
                   </Draw>
                 )}
                 <span className="flex-1">

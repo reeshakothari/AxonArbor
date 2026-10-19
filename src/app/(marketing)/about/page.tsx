@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { Arbor } from "@/components/illustrations/Arbor";
+import { Draw } from "@/components/illustrations/Draw";
 import { Container } from "@/components/layout/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { CTABand } from "@/components/sections/CTABand";
@@ -15,7 +17,14 @@ export default function AboutPage() {
   const { header, founder, advisors, facilitators, partners, cta } = about;
   return (
     <>
-      <PageHeader {...header} />
+      <PageHeader
+        {...header}
+        illustration={
+          <Draw threshold={0.05} className="hero-arbor text-ink">
+            <Arbor className="mx-auto h-80 w-auto sm:h-[26rem]" />
+          </Draw>
+        }
+      />
 
       <section aria-labelledby="founder-heading" className="py-20 sm:py-28">
         <Container className="grid gap-12 lg:grid-cols-12 lg:gap-16">
