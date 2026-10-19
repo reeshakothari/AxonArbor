@@ -98,3 +98,70 @@ export type Partner = {
   stats?: { value: string; label: string }[];
   logo: ImageAsset;
 };
+
+export type PageHeaderContent = SectionIntro & { eyebrow: string };
+
+export type Programme = {
+  id: string;
+  title: string;
+  body: string;
+  listLabel?: string;
+  list?: string[];
+};
+
+export type ProgrammesContent = {
+  meta: PageMeta;
+  header: PageHeaderContent;
+  intro: string[];
+  areas: SectionIntro & { items: string[]; note: string };
+  programmes: SectionIntro & { items: Programme[] };
+  cta: CtaContent;
+};
+
+export type HospitalitySegment = {
+  id: string;
+  title: string;
+  paragraphs: string[];
+  specialisms: string[];
+  image?: ImageAsset;
+};
+
+export type HospitalityContent = {
+  meta: PageMeta;
+  header: PageHeaderContent;
+  intro: string[];
+  segments: HospitalitySegment[];
+  cta: CtaContent;
+};
+
+export type AboutContent = {
+  meta: PageMeta;
+  header: PageHeaderContent;
+  founder: {
+    eyebrow: string;
+    heading: string;
+    paragraphs: string[];
+    name: string;
+    role: string;
+    image: ImageAsset;
+  };
+  advisors: SectionIntro & { people: Person[] };
+  facilitators: SectionIntro & { people: Person[] };
+  partners: SectionIntro & { items: Partner[] };
+  cta: CtaContent;
+};
+
+export type ContactContent = {
+  meta: PageMeta;
+  header: PageHeaderContent;
+  form: {
+    submitLabel: string;
+    successHeading: string;
+    successBody: string;
+  };
+};
+
+export type SignInContent = {
+  meta: PageMeta;
+  header: PageHeaderContent;
+};
