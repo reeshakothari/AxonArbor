@@ -41,12 +41,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 function ringPosition(i: number, total: number) {
   const angle = (-90 + (360 / total) * i) * (Math.PI / 180);
-  return {
-    x: CX + RING * Math.cos(angle),
-    y: CY + RING * Math.sin(angle),
-    cos: Math.cos(angle),
-    sin: Math.sin(angle),
-  };
+  return { x: CX + RING * Math.cos(angle), y: CY + RING * Math.sin(angle), cos: Math.cos(angle), sin: Math.sin(angle) };
 }
 
 function labelOffset(label: string, size: number, resolved: boolean, cos: number, sin: number) {
@@ -127,18 +122,14 @@ export function VendorConstellation({
           stroke="currentColor"
           strokeDasharray="3 5"
           strokeWidth="1.25"
-          className="march text-grey-300"
+          className="text-grey-300"
         >
           {BROKEN_LINKS.map(([a, b]) => {
             const [ax, ay] = SCATTERED[a];
             const [bx, by] = SCATTERED[b];
             const hot = highlighted.includes(a) || highlighted.includes(b);
             return (
-              <g
-                key={`${a}-${b}`}
-                className={hot ? "text-grey-500" : undefined}
-                stroke="currentColor"
-              >
+              <g key={`${a}-${b}`} className={hot ? "text-grey-500" : undefined} stroke="currentColor">
                 <line x1={ax} y1={ay} x2={ax + (bx - ax) * 0.36} y2={ay + (by - ay) * 0.36} />
                 <line x1={bx} y1={by} x2={bx + (ax - bx) * 0.28} y2={by + (ay - by) * 0.28} />
               </g>
@@ -181,55 +172,6 @@ export function VendorConstellation({
 
         <m.g
           initial={false}
-          animate={{ opacity: resolved ? 1 : 0 }}
-          transition={{ duration: 0.6, delay: resolved ? 1 : 0 }}
-        >
-          <circle
-            cx={CX}
-            cy={CY}
-            r={RING + 26}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeDasharray="2 9"
-            className="spin-slow text-grey-400"
-            style={{ transformOrigin: `${CX}px ${CY}px` }}
-          />
-          {resolved &&
-            vendors.map((_, i) => {
-              const p = ringPosition(i, total);
-              const from = `${CX + (RING - 10) * p.cos} ${CY + (RING - 10) * p.sin}`;
-              const to = `${CX + 58 * p.cos} ${CY + 58 * p.sin}`;
-              return (
-                <circle key={`flow-${i}`} r="4" className="signal fill-amber" opacity="0">
-                  <animateMotion
-                    dur="1.8s"
-                    begin={`${1.4 + i * 0.27}s`}
-                    repeatCount="indefinite"
-                    path={`M${from} L${to}`}
-                  />
-                  <animate
-                    attributeName="opacity"
-                    values="0;1;1;0"
-                    keyTimes="0;0.15;0.8;1"
-                    dur="1.8s"
-                    begin={`${1.4 + i * 0.27}s`}
-                    repeatCount="indefinite"
-                  />
-                </circle>
-              );
-            })}
-          <circle
-            cx={CX}
-            cy={CY}
-            r={56}
-            className="ping fill-amber"
-            style={{ transformOrigin: `${CX}px ${CY}px` }}
-          />
-        </m.g>
-
-        <m.g
-          initial={false}
           animate={{ scale: resolved ? 1 : 0, opacity: resolved ? 1 : 0 }}
           transition={{ duration: 0.8, ease, delay: resolved ? 0.2 : 0 }}
           style={{ originX: `${CX}px`, originY: `${CY}px` }}
@@ -267,34 +209,29 @@ export function VendorConstellation({
               animate={{ x: resolved ? ring.x : sx, y: resolved ? ring.y : sy }}
               transition={{ duration: 1.1, ease, delay: resolved ? i * 0.03 : 0 }}
             >
-              <g
-                className={resolved ? undefined : "drift-node"}
-                style={{ animationDelay: `${-i * 0.7}s`, animationDuration: `${3.5 + (i % 3)}s` }}
+              <m.circle
+                r={labelSize * 0.66}
+                strokeWidth="1.5"
+                initial={false}
+                animate={{
+                  fill: hot || resolved ? "#000000" : "#ffffff",
+                  stroke: hot || resolved ? "#000000" : "#9e9e9e",
+                  scale: hot ? 1.35 : 1,
+                }}
+                transition={{ duration: 0.35 }}
+              />
+              <m.text
+                textAnchor="middle"
+                initial={false}
+                animate={{ x: offset.x, y: offset.y }}
+                transition={{ duration: 1.1, ease }}
+                style={{ fontSize: labelSize }}
+                className={`font-label font-semibold tracking-[0.12em] uppercase transition-[fill] duration-300 ${
+                  hot || resolved ? "fill-ink" : "fill-grey-500"
+                }`}
               >
-                <m.circle
-                  r={labelSize * 0.66}
-                  strokeWidth="1.5"
-                  initial={false}
-                  animate={{
-                    fill: hot || resolved ? "#000000" : "#ffffff",
-                    stroke: hot || resolved ? "#000000" : "#9e9e9e",
-                    scale: hot ? 1.35 : 1,
-                  }}
-                  transition={{ duration: 0.35 }}
-                />
-                <m.text
-                  textAnchor="middle"
-                  initial={false}
-                  animate={{ x: offset.x, y: offset.y }}
-                  transition={{ duration: 1.1, ease }}
-                  style={{ fontSize: labelSize }}
-                  className={`font-label font-semibold tracking-[0.12em] uppercase transition-[fill] duration-300 ${
-                    hot || resolved ? "fill-ink" : "fill-grey-500"
-                  }`}
-                >
-                  {label}
-                </m.text>
-              </g>
+                {label}
+              </m.text>
             </m.g>
           );
         })}

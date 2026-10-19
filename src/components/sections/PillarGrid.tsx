@@ -1,6 +1,5 @@
 import { Draw } from "@/components/illustrations/Draw";
 import { LineIcon } from "@/components/illustrations/Icons";
-import { CoachingCircle } from "@/components/illustrations/Legacy";
 import { Container } from "@/components/layout/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { SectionIntro } from "@/components/ui/SectionIntro";
@@ -12,14 +11,9 @@ export function PillarGrid({ eyebrow, heading, lede, pillars }: Props) {
   return (
     <section aria-labelledby="ecosystem-heading" className="py-24 sm:py-32">
       <Container>
-        <div className="grid items-center gap-12 lg:grid-cols-12">
-          <Reveal className="lg:col-span-6">
-            <SectionIntro id="ecosystem-heading" eyebrow={eyebrow} heading={heading} lede={lede} />
-          </Reveal>
-          <Reveal delay={0.15} className="lg:col-span-6">
-            <CoachingCircle className="mx-auto max-w-xl" />
-          </Reveal>
-        </div>
+        <Reveal>
+          <SectionIntro id="ecosystem-heading" eyebrow={eyebrow} heading={heading} lede={lede} />
+        </Reveal>
         <ol className="mt-16 grid border-t border-ink sm:mt-20 lg:grid-cols-3">
           {pillars.map((pillar, i) => (
             <Reveal
@@ -33,8 +27,8 @@ export function PillarGrid({ eyebrow, heading, lede, pillars }: Props) {
                 0{i + 1}
               </p>
               {pillar.icon && (
-                <Draw className="idle-bob mt-8 text-ink">
-                  <LineIcon name={pillar.icon} className="size-24" />
+                <Draw className="mt-8 text-ink">
+                  <LineIcon name={pillar.icon} className="size-16" />
                 </Draw>
               )}
               <h3 className="mt-6 font-serif text-3xl tracking-tight">{pillar.title}</h3>

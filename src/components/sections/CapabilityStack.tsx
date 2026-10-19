@@ -18,8 +18,8 @@ export function CapabilityStack({ eyebrow, heading, lede, columns }: Props) {
           <Reveal>
             <SectionIntro id="capability-heading" eyebrow={eyebrow} heading={heading} lede={lede} />
           </Reveal>
-          <Draw className="mx-auto shrink-0 lg:mx-0">
-            <CapabilityRing count={columns.length} className="size-64 overflow-visible lg:size-72" />
+          <Draw className="hidden shrink-0 lg:block">
+            <CapabilityRing count={columns.length} className="size-56" />
           </Draw>
         </div>
 

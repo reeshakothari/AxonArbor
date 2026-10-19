@@ -1,4 +1,3 @@
-import { LegacyIllustration } from "@/components/illustrations/Legacy";
 import { Container } from "@/components/layout/Container";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { PageHeader } from "@/components/sections/PageHeader";
@@ -11,10 +10,7 @@ export const metadata = pageMetadata(contact.meta);
 export default function ContactPage() {
   return (
     <>
-      <PageHeader
-        {...contact.header}
-        illustration={<LegacyIllustration scene="designing" eager className="mx-auto max-w-md" />}
-      />
+      <PageHeader {...contact.header} />
       <section aria-label="Contact form and details" className="py-16 sm:py-24">
         <Container className="grid gap-16 lg:grid-cols-12">
           <div className="relative lg:col-span-7">

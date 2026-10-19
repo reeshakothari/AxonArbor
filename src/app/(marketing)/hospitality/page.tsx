@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { LegacyIllustration } from "@/components/illustrations/Legacy";
 import { Container } from "@/components/layout/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { CTABand } from "@/components/sections/CTABand";
@@ -13,7 +12,7 @@ export default function HospitalityPage() {
   const { header, intro, segments, cta } = hospitality;
   return (
     <>
-      <PageHeader {...header} illustration={<LegacyIllustration scene="coffee-date" eager />} />
+      <PageHeader {...header} />
 
       <section aria-label="Why training matters in hospitality" className="py-20 sm:py-28">
         <Container className="grid gap-10 lg:grid-cols-12">

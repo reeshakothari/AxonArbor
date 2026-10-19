@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { BranchDivider } from "@/components/illustrations/BranchDivider";
 import { BeyondTraining } from "@/components/sections/BeyondTraining";
 import { CapabilityStack } from "@/components/sections/CapabilityStack";
 import { CTABand } from "@/components/sections/CTABand";
@@ -24,11 +23,9 @@ export default function HomePage() {
       <ProblemSection content={home.problem} />
       <PullQuote {...home.pullQuote} />
       <PillarGrid {...home.ecosystem} />
-      <BranchDivider />
       <CapabilityStack {...home.capabilityStack} />
       <Ticker label={programmes.areas.heading} items={programmes.areas.items} />
       <BeyondTraining {...home.beyondTraining} />
-      <BranchDivider flip />
       <CTABand {...home.cta} />
     </>
   );

@@ -1,4 +1,3 @@
-import { LegacyIllustration } from "@/components/illustrations/Legacy";
 import { Container } from "@/components/layout/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { CTABand } from "@/components/sections/CTABand";
@@ -13,7 +12,7 @@ export default function ProgrammesPage() {
   const { header, intro, areas, programmes: signature, cta } = programmes;
   return (
     <>
-      <PageHeader {...header} illustration={<LegacyIllustration scene="presenting" eager />} />
+      <PageHeader {...header} />
 
       <section aria-labelledby="areas-heading" className="py-20 sm:py-28">
         <Container className="grid gap-14 lg:grid-cols-12">
