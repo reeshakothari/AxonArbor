@@ -28,9 +28,12 @@ export type PageMeta = {
   path: string;
 };
 
+export type IconName = "one-stop" | "tailored" | "experts" | "inclusion" | "speaker" | "coaching";
+
 export type Item = {
   title: string;
   body: string;
+  icon?: IconName;
 };
 
 export type LinkedItem = Item & { href?: string };

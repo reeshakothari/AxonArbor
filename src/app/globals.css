@@ -144,6 +144,121 @@
   }
 }
 
+/* ---------- Line illustrations (see components/illustrations) ---------- */
+
+.draw [data-stroke] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.3s var(--ease-out-soft) calc(var(--d, 0) * 1ms);
+}
+
+.draw [data-node] {
+  transform: scale(0);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.5s var(--ease-out-soft) calc(var(--d, 0) * 1ms);
+}
+
+.draw[data-drawn="true"] [data-stroke] {
+  stroke-dashoffset: 0;
+}
+
+.draw[data-drawn="true"] [data-node] {
+  transform: scale(1);
+}
+
+@keyframes breathe {
+  50% {
+    transform: scale(1.35);
+    opacity: 0.75;
+  }
+}
+
+/* Capability ring: hovering a column lights its arc. */
+.stack-arc {
+  transition:
+    stroke 0.3s,
+    stroke-width 0.3s,
+    stroke-dashoffset 1.3s var(--ease-out-soft) calc(var(--d, 0) * 1ms);
+}
+
+.stack:has([data-col="0"]:hover) [data-arc="0"],
+.stack:has([data-col="1"]:hover) [data-arc="1"],
+.stack:has([data-col="2"]:hover) [data-arc="2"],
+.stack:has([data-col="3"]:hover) [data-arc="3"] {
+  stroke: var(--color-amber);
+  stroke-width: 7;
+}
+
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes wipe-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .breathe {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: breathe 3.2s ease-in-out 2.5s infinite;
+  }
+
+  .ticker-track {
+    animation: ticker 60s linear infinite;
+  }
+
+  .ticker:hover .ticker-track {
+    animation-play-state: paused;
+  }
+
+  @supports (animation-timeline: view()) {
+    .img-reveal {
+      animation: wipe-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draw [data-stroke] {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+
+  .draw [data-node] {
+    transform: none;
+    transition: none;
+  }
+
+  .ticker-track {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.75rem;
+    padding-inline: 1.25rem;
+  }
+
+  .ticker-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.75rem;
+  }
+
+  .ticker-row[aria-hidden="true"] {
+    display: none;
+  }
+}
+
 @utility eyebrow {
   font-family: var(--font-label);
   font-size: 0.75rem;

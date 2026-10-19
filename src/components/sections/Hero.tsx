@@ -1,3 +1,5 @@
+import { Arbor } from "@/components/illustrations/Arbor";
+import { Draw } from "@/components/illustrations/Draw";
 import { Container } from "@/components/layout/Container";
 import { ButtonLink } from "@/components/ui/Button";
 import type { HeroContent } from "@/content/types";
@@ -8,7 +10,7 @@ export function Hero({ eyebrow, heading, lede, primaryCta, secondaryCta }: HeroC
       aria-labelledby="hero-heading"
       className="relative border-b border-grey-200"
     >
-      <Container className="grid min-h-[calc(100svh-4rem)] content-between gap-16 pt-16 pb-12 sm:pt-24 lg:min-h-[calc(100svh-72px)] lg:grid-cols-12 lg:gap-8 lg:pt-28 lg:pb-16">
+      <Container className="grid min-h-[calc(100svh-4rem)] content-between gap-16 pt-16 pb-12 sm:pt-24 lg:min-h-[calc(100svh-72px)] lg:grid-cols-12 lg:gap-8 lg:pt-20 lg:pb-16">
         <h1
           id="hero-heading"
           className="font-serif text-[clamp(3.25rem,11vw,8.5rem)] leading-[0.95] tracking-[-0.03em] lg:col-span-8"
@@ -29,6 +31,9 @@ export function Hero({ eyebrow, heading, lede, primaryCta, secondaryCta }: HeroC
         </h1>
 
         <div className="flex flex-col justify-end lg:col-span-4 lg:pb-3">
+          <Draw threshold={0.1} className="mb-6 hidden text-ink lg:block">
+            <Arbor className="h-[clamp(100px,18svh,190px)] w-auto" />
+          </Draw>
           <p aria-hidden="true" className="font-serif text-2xl leading-snug text-balance sm:text-3xl">
             {heading}
           </p>

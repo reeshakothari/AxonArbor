@@ -1,3 +1,5 @@
+import { Draw } from "@/components/illustrations/Draw";
+import { LineIcon } from "@/components/illustrations/Icons";
 import { Container } from "@/components/layout/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { SectionIntro } from "@/components/ui/SectionIntro";
@@ -24,7 +26,12 @@ export function PillarGrid({ eyebrow, heading, lede, pillars }: Props) {
                 <span aria-hidden="true" className="size-2 bg-amber" />
                 0{i + 1}
               </p>
-              <h3 className="mt-8 font-serif text-3xl tracking-tight">{pillar.title}</h3>
+              {pillar.icon && (
+                <Draw className="mt-8 text-ink">
+                  <LineIcon name={pillar.icon} className="size-16" />
+                </Draw>
+              )}
+              <h3 className="mt-6 font-serif text-3xl tracking-tight">{pillar.title}</h3>
               <p className="mt-4 leading-relaxed text-grey-600">{pillar.body}</p>
             </Reveal>
           ))}

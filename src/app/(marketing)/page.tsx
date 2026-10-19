@@ -6,7 +6,9 @@ import { Hero } from "@/components/sections/Hero";
 import { PillarGrid } from "@/components/sections/PillarGrid";
 import { ProblemSection } from "@/components/sections/ProblemSection";
 import { PullQuote } from "@/components/sections/PullQuote";
+import { Ticker } from "@/components/sections/Ticker";
 import { home } from "@/content/home";
+import { programmes } from "@/content/programmes";
 
 export const metadata: Metadata = {
   title: { absolute: `Axon Arbor | ${home.meta.title}` },
@@ -22,6 +24,7 @@ export default function HomePage() {
       <PullQuote {...home.pullQuote} />
       <PillarGrid {...home.ecosystem} />
       <CapabilityStack {...home.capabilityStack} />
+      <Ticker label={programmes.areas.heading} items={programmes.areas.items} />
       <BeyondTraining {...home.beyondTraining} />
       <CTABand {...home.cta} />
     </>

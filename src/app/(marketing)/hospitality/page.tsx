@@ -51,7 +51,7 @@ export default function HospitalityPage() {
                   <Reveal
                     className={`lg:col-span-5 ${flip ? "lg:order-2 lg:col-start-8" : ""}`}
                   >
-                    <div className="relative aspect-[4/5] overflow-hidden bg-grey-100">
+                    <div className="img-reveal relative aspect-[4/5] overflow-hidden bg-grey-100">
                       <Image
                         src={segment.image.src}
                         alt={segment.image.alt}

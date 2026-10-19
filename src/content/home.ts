@@ -77,14 +77,17 @@ export const home: HomeContent = {
     pillars: [
       {
         title: "One Stop Shop",
+        icon: "one-stop",
         body: "A full-stack L&D partner that designs, delivers and integrates every aspect of capability building. No more vendor juggling.",
       },
       {
         title: "Tailored Solutions",
+        icon: "tailored",
         body: "We have a knack for reading the pulse of your stakeholders and drawing meaning from diverse sources of information, then designing around what we hear.",
       },
       {
         title: "Subject Matter Experts",
+        icon: "experts",
         body: "Highly experienced consultants, coaches and SMEs who have spent years honing their craft, matched to each brief to strengthen your internal brand.",
       },
     ],
@@ -142,16 +145,19 @@ export const home: HomeContent = {
     items: [
       {
         title: "Diversity, Equity & Inclusion",
+        icon: "inclusion",
         body: "Building truly inclusive cultures where everyone can thrive.",
         href: "/programmes#diversity-equity-inclusion",
       },
       {
         title: "Celebrity & Industry Experts",
+        icon: "speaker",
         body: "Learn from the best. Speakers who turn an event into something people remember.",
         href: "/about#partners",
       },
       {
         title: "Executive Coaching",
+        icon: "coaching",
         body: "Coaching for leaders, grounded in the Appreciative Inquiry model.",
         href: "/programmes#coaching-mentoring-assessment",
       },
