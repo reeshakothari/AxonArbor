@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Brand tokens. The default Tailwind palette is cleared so only brand colours
+ * (black, white, amber and greys derived from black) are available.
+ */
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-ink: #000000;
+  --color-paper: #ffffff;
+  --color-amber: #ffc107;
+
+  /* Neutral greys, mixed from black. 500 and darker pass AA for text on white. */
+  --color-grey-50: #f7f7f7;
+  --color-grey-100: #efefef;
+  --color-grey-200: #dedede;
+  --color-grey-300: #c4c4c4;
+  --color-grey-400: #9e9e9e;
+  --color-grey-500: #6e6e6e;
+  --color-grey-600: #555555;
+  --color-grey-700: #3b3b3b;
+  --color-grey-800: #242424;
+  --color-grey-900: #141414;
+
+  --font-serif: var(--font-gelasio), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-label: var(--font-montserrat), system-ui, sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    scroll-padding-top: 5rem;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--color-amber);
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes dot-in {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-dot {
+    animation: dot-in 600ms var(--ease-out-soft) both;
+  }
+}
+
+@utility eyebrow {
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@utility text-balance-pretty {
+  text-wrap: balance;
 }
