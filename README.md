@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Axon Arbor — marketing site
 
-## Getting Started
-
-First, run the development server:
+Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Framer Motion. Deploys to Vercel.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
+npm run build   # production build (must pass with zero type/lint errors)
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+  app/
+    (marketing)/        public pages: /, /programmes, /hospitality, /about, /contact, /sign-in
+    (app)/              reserved for phase 2 dashboards (see its README)
+    api/contact/        contact form route handler (validates + logs for now)
+    sitemap.ts, robots.ts, icon.png, apple-icon.png, opengraph-image.png
+  components/
+    layout/             Header, Footer, Logo, Container
+    sections/           Hero, ProblemSection, VendorConstellation, PullQuote, PillarGrid,
+                        CapabilityStack, BeyondTraining, CTABand, PageHeader, PersonCard
+    forms/              ContactForm
+    motion/             MotionProvider (Framer Motion, problem section only), Reveal (CSS)
+    ui/                 Button, Eyebrow, SectionIntro
+  content/              all page copy as typed objects (types.ts describes the model)
+  lib/                  metadata helper, shared contact validation
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Editing content
 
-## Learn More
+All copy lives in `src/content/*.ts`, typed by `src/content/types.ts`. Components never
+hard-code copy, so this layer can later be swapped for a CMS or Supabase.
 
-To learn more about Next.js, take a look at the following resources:
+## Brand rules
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Colours: amber `#FFC107` (accents and fills only, never small text on white), black,
+  white, and greys derived from black. The default Tailwind palette is disabled in
+  `globals.css`, so other hues are unavailable by design.
+- Type: Gelasio (headings), Inter (body), Montserrat (labels, buttons, stats).
+- Logo: `public/brand/logo.png`, used unaltered (cropped only by CSS in `Logo.tsx`).
+- British English throughout.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Motion
 
-## Deploy on Vercel
+- The problem section pins on desktop screens at least 640px tall (`pin:` variant) and
+  resolves the vendor constellation as you scroll. Phones get a stacked version.
+- Section reveals and the pull-quote use CSS scroll-driven animations (no JS).
+- Everything respects `prefers-reduced-motion`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable               | Default                    | Purpose                              |
+| ---------------------- | -------------------------- | ------------------------------------ |
+| `NEXT_PUBLIC_SITE_URL` | `https://www.axonarbor.in` | Canonical URLs, sitemap, OG metadata |
+
+## TODO
+
+- Contact form: deliver enquiries by email (`src/app/api/contact/route.ts`).
+- Phase 2: dashboards, onboarding and admin panel in `(app)`.
