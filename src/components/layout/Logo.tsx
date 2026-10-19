@@ -24,7 +24,7 @@ export function LogoMark({ size = 44 }: { size?: number }) {
         width={site.logo.width}
         height={site.logo.height}
         sizes={`${Math.round(size * 1.6)}px`}
-        priority
+        loading="eager"
         className="absolute inset-0 h-full w-full origin-[50%_46%] scale-[1.55] object-cover"
       />
     </span>

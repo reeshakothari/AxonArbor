@@ -27,6 +27,8 @@ export default function AboutPage() {
                   alt={founder.image.alt}
                   fill
                   sizes="(min-width: 1024px) 40vw, 100vw"
+                  loading="eager"
+                  fetchPriority="high"
                   className="object-cover grayscale"
                 />
               </div>

@@ -5,10 +5,7 @@ import { signIn } from "@/content/contact";
 import { site } from "@/content/site";
 import { pageMetadata } from "@/lib/metadata";
 
-export const metadata = {
-  ...pageMetadata(signIn.meta),
-  robots: { index: false, follow: true },
-};
+export const metadata = pageMetadata(signIn.meta);
 
 export default function SignInPage() {
   return (

@@ -3,12 +3,19 @@ import { Gelasio, Inter, Montserrat } from "next/font/google";
 import { site } from "@/content/site";
 import "./globals.css";
 
+// Only the faces used above the fold on every page are preloaded.
 const gelasio = Gelasio({
   variable: "--font-gelasio",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
   display: "swap",
+});
+
+const gelasioItalic = Gelasio({
+  variable: "--font-gelasio-italic",
+  subsets: ["latin"],
+  style: "italic",
+  display: "swap",
+  preload: false,
 });
 
 const inter = Inter({
@@ -20,8 +27,8 @@ const inter = Inter({
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -56,7 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en-GB"
-      className={`${gelasio.variable} ${inter.variable} ${montserrat.variable} antialiased`}
+      className={`${gelasio.variable} ${gelasioItalic.variable} ${inter.variable} ${montserrat.variable} antialiased`}
     >
       <body className="flex min-h-dvh flex-col">{children}</body>
     </html>

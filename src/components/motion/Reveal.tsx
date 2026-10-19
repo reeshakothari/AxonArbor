@@ -1,26 +1,22 @@
-"use client";
-
-import { m } from "framer-motion";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 type RevealProps = {
   children: ReactNode;
+  /** Staggers the reveal slightly later in the scroll range (0–1). */
   delay?: number;
   className?: string;
   as?: "div" | "li";
 };
 
-/** Fades and lifts content into place the first time it scrolls into view. */
-export function Reveal({ children, delay = 0, className, as = "div" }: RevealProps) {
-  const Tag = as === "li" ? m.li : m.div;
+/**
+ * Fades and lifts content in as it scrolls into view, using CSS scroll-driven
+ * animations (see `.reveal` in globals.css). No JavaScript; browsers without
+ * support, and visitors who prefer reduced motion, simply see the content.
+ */
+export function Reveal({ children, delay = 0, className = "", as: Tag = "div" }: RevealProps) {
+  const style = delay ? ({ "--reveal-offset": `${Math.round(delay * 60)}%` } as CSSProperties) : undefined;
   return (
-    <Tag
-      className={className}
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "0px 0px -10% 0px" }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <Tag className={`reveal ${className}`} style={style}>
       {children}
     </Tag>
   );

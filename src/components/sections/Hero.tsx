@@ -15,7 +15,7 @@ export function Hero({ eyebrow, heading, lede, primaryCta, secondaryCta }: HeroC
         >
           {eyebrow.map((word, i) => (
             <span key={word} className="flex items-baseline gap-[0.18em]">
-              <span className={i === eyebrow.length - 1 ? "italic" : undefined}>
+              <span className={i === eyebrow.length - 1 ? "font-serif-italic italic" : undefined}>
                 {word}
               </span>
               <span
