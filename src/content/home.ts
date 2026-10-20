@@ -58,6 +58,7 @@ export const home: HomeContent = {
     ],
     resolution:
       "Axon Arbor exists to turn learning into a business advantage: a strategic driver of organisational success, not a reactive function.",
+    hubLabel: "Axon Arbor",
   },
 
   pullQuote: {

@@ -52,3 +52,15 @@ export function hasMarker(text: string): boolean {
 export function visibleLength(text: string): number {
   return stripMarkers(text).length;
 }
+
+/**
+ * Splits text into words while keeping it traceable in the inline editor:
+ * the marker (if any) is copied onto every piece.
+ */
+export function splitWords(text: string): string[] {
+  const markers = text.match(MARKER_RE)?.join("") ?? "";
+  return stripMarkers(text)
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word + markers);
+}

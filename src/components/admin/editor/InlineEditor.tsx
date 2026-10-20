@@ -3,11 +3,12 @@
 /* eslint-disable @next/next/no-img-element -- admin thumbnails of arbitrary uploads */
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Component, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { discardDrafts, publishSite, saveDrafts } from "@/app/admin/actions";
 import { contentPages, type ContentKey, type ContentMap } from "@/content/registry";
 import { blankOf, itemTemplate } from "@/lib/content/merge";
 import { decodeIds, hasMarker } from "@/lib/stega";
+import { EditingContext } from "@/components/editing-context";
 import { SiteChrome } from "@/views/SiteChrome";
 import { MediaLibrary } from "../MediaLibrary";
 import { ACCEPT_ATTR, uploadImage, type MediaItem } from "../media";
@@ -51,6 +52,31 @@ function pointIn(rect: DOMRect, x: number, y: number, pad = 2) {
   return x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad;
 }
 
+/* ---------- crash guard ---------- */
+
+/** Keeps the editor usable if a section can't render the current content. */
+class CanvasBoundary extends Component<{ children: ReactNode; resetKey: number }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidUpdate(prev: { resetKey: number }) {
+    if (prev.resetKey !== this.props.resetKey && this.state.failed) this.setState({ failed: false });
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <div className="mx-auto my-24 max-w-xl border border-grey-200 bg-paper p-8 font-sans">
+        <p className="font-serif text-2xl">This page couldn’t be shown with the latest change.</p>
+        <p className="mt-3 text-grey-600">
+          Undo your last edit in “All settings” (for example, fill in a field you emptied), or press Discard. Your
+          live website is not affected.
+        </p>
+      </div>
+    );
+  }
+}
+
 /* ---------- component ---------- */
 
 export function InlineEditor({
@@ -82,6 +108,7 @@ export function InlineEditor({
   const [showHelp, setShowHelp] = useState(true);
 
   const encoded = useMemo(() => encodeDocs(docs), [docs]);
+  const [editCount, setEditCount] = useState(0);
 
   /* ----- editing ----- */
 
@@ -98,6 +125,7 @@ export function InlineEditor({
       }
       return next;
     });
+    setEditCount((n) => n + 1);
     setSaveState("unsaved");
   }, []);
 
@@ -289,10 +317,16 @@ export function InlineEditor({
         onPointerLeave={() => setHover(null)}
         onClickCapture={onClickCapture}
         onSubmitCapture={(e) => e.preventDefault()}
-        className={preview ? "" : "[&_a]:cursor-text [&_button]:cursor-text [&_img]:cursor-pointer"}
+        className={preview ? "" : "editing [&_a]:cursor-text [&_button]:cursor-text [&_img]:cursor-pointer"}
       >
-        <SiteChrome site={encoded.docs.site}>{renderPage(page.id, encoded.docs)}</SiteChrome>
+        <CanvasBoundary resetKey={editCount}>
+          <EditingContext value={!preview}>
+            <SiteChrome site={encoded.docs.site}>{renderPage(page.id, encoded.docs)}</SiteChrome>
+          </EditingContext>
+        </CanvasBoundary>
       </div>
+      {/* Room to scroll the end of the page clear of the floating toolbar. */}
+      <div aria-hidden="true" className="h-28 bg-ink" />
 
       {/* Hover outline */}
       {hover && !preview && (

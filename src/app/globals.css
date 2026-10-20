@@ -241,10 +241,8 @@
   }
 
   .ticker-track {
+    display: block;
     width: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    row-gap: 0.75rem;
     padding-inline: 1.25rem;
   }
 
@@ -257,6 +255,37 @@
   .ticker-row[aria-hidden="true"] {
     display: none;
   }
+}
+
+/*
+ * Inline editor: hold the page still so every piece of text can be clicked.
+ * Scroll-driven fades are switched off and the ticker becomes a wrapped list.
+ * Preview mode removes the .editing class and restores all motion.
+ */
+.editing .reveal,
+.editing .pq-rule,
+.editing .pq-heavy,
+.editing .pq-light,
+.editing .img-reveal,
+.editing .hero-dot {
+  animation: none !important;
+}
+
+.editing .ticker-track {
+  animation: none !important;
+  display: block;
+  width: auto;
+  padding-inline: 1.25rem;
+}
+
+.editing .ticker-row {
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 0.75rem;
+}
+
+.editing .ticker-row[aria-hidden="true"] {
+  display: none;
 }
 
 @utility eyebrow {

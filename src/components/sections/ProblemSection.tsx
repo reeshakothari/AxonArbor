@@ -2,6 +2,7 @@
 
 import { useInView, useMotionValueEvent, useScroll } from "framer-motion";
 import { useRef, useState } from "react";
+import { useIsEditing } from "@/components/editing-context";
 import { Container } from "@/components/layout/Container";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -30,7 +31,7 @@ function stageFor(progress: number, steps: number) {
  * one closes it, resolving as it scrolls into view.
  */
 export function ProblemSection({ content }: { content: ProblemContent }) {
-  const { eyebrow, heading, lede, stat, resolvedStat, vendors, painPoints, resolution } = content;
+  const { eyebrow, heading, lede, stat, resolvedStat, vendors, painPoints, resolution, hubLabel } = content;
   const sectionRef = useRef<HTMLElement>(null);
   const mobileResolvedRef = useRef<HTMLDivElement>(null);
   const mobileResolved = useInView(mobileResolvedRef, { once: true, amount: 0.6 });
@@ -44,8 +45,11 @@ export function ProblemSection({ content }: { content: ProblemContent }) {
     setStage(stageFor(p, painPoints.length));
   });
 
-  const resolved = stage === painPoints.length;
-  const highlighted = stage >= 0 && !resolved ? painPoints[stage].vendors : [];
+  // In the admin editor the story is laid out flat so every item can be clicked.
+  const editing = useIsEditing();
+  const resolved = !editing && stage === painPoints.length;
+  // Out-of-range stages (end of the story, or fewer pain points after an edit) highlight nothing.
+  const highlighted = !resolved ? (painPoints[stage]?.vendors ?? []) : [];
 
   return (
     <MotionProvider>
@@ -53,9 +57,13 @@ export function ProblemSection({ content }: { content: ProblemContent }) {
         ref={sectionRef}
         id="problem"
         aria-labelledby="problem-heading"
-        className="relative pin:h-[340vh]"
+        className={editing ? "relative" : "relative pin:h-[340vh]"}
       >
-        <div className="pin:sticky pin:top-[72px] pin:flex pin:h-[calc(100svh-72px)] pin:items-center">
+        <div
+          className={
+            editing ? "" : "pin:sticky pin:top-[72px] pin:flex pin:h-[calc(100svh-72px)] pin:items-center"
+          }
+        >
           <Container className="grid gap-12 py-20 sm:py-24 lg:grid-cols-12 lg:gap-10 pin:py-6">
             <div className="lg:col-span-5">
               <Eyebrow>{eyebrow}</Eyebrow>
@@ -74,6 +82,7 @@ export function ProblemSection({ content }: { content: ProblemContent }) {
                 resolved={false}
                 stat={stat}
                 resolvedStat={resolvedStat}
+                hubLabel={hubLabel}
                 labelSize={18}
                 className="mx-auto mt-12 max-w-md lg:hidden"
               />
@@ -81,13 +90,14 @@ export function ProblemSection({ content }: { content: ProblemContent }) {
               {/* On desktop the list and the resolution share one grid cell and crossfade. */}
               <div className="mt-12 lg:mt-8 lg:grid">
                 <ol
-                  className={`border-t border-grey-200 transition-opacity duration-500 lg:[grid-area:1/1] ${
+                  className={`border-t border-grey-200 transition-opacity duration-500 ${editing ? "" : "lg:[grid-area:1/1]"} ${
                     resolved ? "lg:pointer-events-none lg:opacity-0" : ""
                   }`}
                 >
                   {painPoints.map((point, i) => {
                     const active = stage === i;
-                    const dimmed = stage >= 0 && !active;
+                    const open = editing || active;
+                    const dimmed = !editing && stage >= 0 && !active;
                     return (
                       <li
                         key={i}
@@ -116,9 +126,7 @@ export function ProblemSection({ content }: { content: ProblemContent }) {
                             </h3>
                             <div
                               className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
-                                active
-                                  ? "lg:grid-rows-[1fr] lg:opacity-100"
-                                  : "lg:grid-rows-[0fr] lg:opacity-0"
+                                open ? "lg:grid-rows-[1fr] lg:opacity-100" : "lg:grid-rows-[0fr] lg:opacity-0"
                               }`}
                             >
                               <p className="overflow-hidden pt-2 leading-relaxed text-grey-600 lg:text-[0.95rem]">
@@ -133,10 +141,14 @@ export function ProblemSection({ content }: { content: ProblemContent }) {
                 </ol>
 
                 <div
-                  className={`mt-12 transition-all duration-700 lg:mt-0 lg:self-center lg:[grid-area:1/1] ${
-                    resolved
-                      ? "lg:translate-y-0 lg:opacity-100"
-                      : "lg:pointer-events-none lg:translate-y-4 lg:opacity-0"
+                  className={`mt-12 transition-all duration-700 ${
+                    editing
+                      ? "lg:mt-10"
+                      : `lg:mt-0 lg:self-center lg:[grid-area:1/1] ${
+                          resolved
+                            ? "lg:translate-y-0 lg:opacity-100"
+                            : "lg:pointer-events-none lg:translate-y-4 lg:opacity-0"
+                        }`
                   }`}
                 >
                   <span aria-hidden="true" className="block h-0.5 w-12 bg-amber" />
@@ -149,23 +161,46 @@ export function ProblemSection({ content }: { content: ProblemContent }) {
               <div ref={mobileResolvedRef} className="mx-auto mt-12 max-w-md lg:hidden">
                 <VendorConstellation
                   vendors={vendors}
-                  resolved={mobileResolved}
+                  resolved={editing || mobileResolved}
                   stat={stat}
                   resolvedStat={resolvedStat}
+                  hubLabel={hubLabel}
                   labelSize={18}
                 />
               </div>
             </div>
 
-            <div className="hidden lg:col-span-7 lg:flex lg:items-center lg:justify-center">
-              <VendorConstellation
-                vendors={vendors}
-                highlighted={highlighted}
-                resolved={resolved}
-                stat={stat}
-                resolvedStat={resolvedStat}
-                className="w-full pin:max-w-[calc((100svh-72px-10rem)*1.11)]"
-              />
+            <div className="hidden lg:col-span-7 lg:flex lg:flex-col lg:items-center lg:justify-center lg:gap-16">
+              {editing ? (
+                <>
+                  <VendorConstellation
+                    vendors={vendors}
+                    resolved={false}
+                    stat={stat}
+                    resolvedStat={resolvedStat}
+                    hubLabel={hubLabel}
+                    className="w-full max-w-xl"
+                  />
+                  <VendorConstellation
+                    vendors={vendors}
+                    resolved
+                    stat={stat}
+                    resolvedStat={resolvedStat}
+                    hubLabel={hubLabel}
+                    className="w-full max-w-xl"
+                  />
+                </>
+              ) : (
+                <VendorConstellation
+                  vendors={vendors}
+                  highlighted={highlighted}
+                  resolved={resolved}
+                  stat={stat}
+                  resolvedStat={resolvedStat}
+                  hubLabel={hubLabel}
+                  className="w-full pin:max-w-[calc((100svh-72px-10rem)*1.11)]"
+                />
+              )}
             </div>
           </Container>
         </div>

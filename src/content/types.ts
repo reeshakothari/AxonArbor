@@ -67,6 +67,8 @@ export type ProblemContent = SectionIntro & {
   vendors: string[];
   painPoints: PainPoint[];
   resolution: string;
+  /** Label inside the amber hub once the vendors connect (first word on line one). */
+  hubLabel: string;
 };
 
 export type CtaContent = {

@@ -2,7 +2,7 @@
 
 import { m } from "framer-motion";
 import { useId } from "react";
-import { visibleLength } from "@/lib/stega";
+import { splitWords, visibleLength } from "@/lib/stega";
 
 const W = 600;
 const H = 540;
@@ -23,6 +23,11 @@ const SCATTERED: [number, number][] = [
   [168, 462],
   [424, 478],
 ];
+
+/** Position for vendor i; vendors added beyond the hand-placed ten get a spread-out fallback. */
+function scatteredAt(i: number): [number, number] {
+  return SCATTERED[i] ?? [70 + ((i * 137) % 460), 60 + ((i * 89) % 420)];
+}
 
 /** Pairs of vendors that try, and fail, to connect. */
 const BROKEN_LINKS: [number, number][] = [
@@ -59,6 +64,8 @@ type Props = {
   resolved: boolean;
   stat: Stat;
   resolvedStat: Stat;
+  /** Text inside the amber hub once connected; the first word sits on line one. */
+  hubLabel: string;
   /** Label size in SVG units. Larger on phones, where the SVG is scaled down. */
   labelSize?: number;
   className?: string;
@@ -70,14 +77,17 @@ export function VendorConstellation({
   resolved,
   stat,
   resolvedStat,
+  hubLabel,
   labelSize = 10.5,
   className = "",
 }: Props) {
   const descId = useId();
   const centreSize = Math.max(17, labelSize * 1.3);
+  const [hubFirst = "", ...hubWords] = splitWords(hubLabel);
+  const hubRest = hubWords.length ? hubWords.join(" ") : "";
   const total = vendors.length;
   const description = resolved
-    ? `${total} learning services, from ${vendors.slice(0, 3).join(", ")} to ${vendors[total - 1]}, connected through one central partner, Axon Arbor.`
+    ? `${total} learning services, from ${vendors.slice(0, 3).join(", ")} to ${vendors[total - 1]}, connected through one central partner.`
     : `${total} separate vendors, including ${vendors.slice(0, 3).join(", ")} and ${vendors[total - 1]}, scattered with broken, incomplete connections between them.`;
 
   return (
@@ -90,7 +100,7 @@ export function VendorConstellation({
               <m.p
                 key={i}
                 aria-hidden={!visible}
-                className="absolute inset-0 flex items-end gap-4"
+                className={`absolute inset-0 flex items-end gap-4 ${visible ? "" : "pointer-events-none"}`}
                 initial={false}
                 animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : i === 0 ? -12 : 12 }}
                 transition={{ duration: 0.5, ease }}
@@ -125,9 +135,9 @@ export function VendorConstellation({
           strokeWidth="1.25"
           className="text-grey-300"
         >
-          {BROKEN_LINKS.map(([a, b]) => {
-            const [ax, ay] = SCATTERED[a];
-            const [bx, by] = SCATTERED[b];
+          {BROKEN_LINKS.filter(([a, b]) => a < total && b < total).map(([a, b]) => {
+            const [ax, ay] = scatteredAt(a);
+            const [bx, by] = scatteredAt(b);
             const hot = highlighted.includes(a) || highlighted.includes(b);
             return (
               <g key={`${a}-${b}`} className={hot ? "text-grey-500" : undefined} stroke="currentColor">
@@ -185,7 +195,7 @@ export function VendorConstellation({
             style={{ fontSize: centreSize }}
             className="fill-ink font-serif font-semibold"
           >
-            Axon
+            {hubFirst}
           </text>
           <text
             x={CX}
@@ -194,13 +204,13 @@ export function VendorConstellation({
             style={{ fontSize: centreSize }}
             className="fill-ink font-serif font-semibold"
           >
-            Arbor
+            {hubRest}
           </text>
         </m.g>
 
         {vendors.map((label, i) => {
           const ring = ringPosition(i, total);
-          const [sx, sy] = SCATTERED[i];
+          const [sx, sy] = scatteredAt(i);
           const hot = !resolved && highlighted.includes(i);
           const offset = labelOffset(label, labelSize, resolved, ring.cos, ring.sin);
           return (
