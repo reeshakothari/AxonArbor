@@ -1,8 +1,6 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element -- admin thumbnails of arbitrary uploads */
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Component, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { discardDrafts, publishSite, saveDrafts } from "@/app/admin/actions";
 import { contentPages, type ContentKey, type ContentMap } from "@/content/registry";
@@ -88,7 +86,6 @@ export function InlineEditor({
   initialDocs: ContentMap;
   initialUnpublished: ContentKey[];
 }) {
-  const router = useRouter();
   const page = findPage(pageId) ?? EDITABLE_PAGES[0];
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -162,14 +159,30 @@ export function InlineEditor({
     return () => clearTimeout(timer);
   }, [docs, saveState, save]);
 
-  // Warn before leaving with unsaved edits.
+  // Warn before leaving with unsaved edits (unless we're leaving after saving).
+  const unsavedRef = useRef(false);
+  useEffect(() => {
+    unsavedRef.current = saveState === "unsaved" || saveState === "saving";
+  }, [saveState]);
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (saveState === "unsaved" || saveState === "saving") e.preventDefault();
+      if (unsavedRef.current) e.preventDefault();
     };
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, [saveState]);
+  }, []);
+
+  /** Saves, then opens another page in the editor with fresh drafts from the server. */
+  const goToPage = useCallback(
+    async (id: string) => {
+      if (!(await save())) return;
+      unsavedRef.current = false;
+      // A full load (not router.push) so the next page starts from fresh server drafts.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.assign(`/admin/edit/${id}`);
+    },
+    [save],
+  );
 
   /* ----- finding what's under the pointer ----- */
 
@@ -227,14 +240,20 @@ export function InlineEditor({
         e.preventDefault();
         const url = new URL(anchor.href, window.location.href);
         const next = url.origin === window.location.origin ? pageForPath(url.pathname) : undefined;
-        if (next) router.push(`/admin/edit/${next.id}`);
+        if (next) void goToPage(next.id);
         else if (url.origin !== window.location.origin) window.open(url.href, "_blank", "noopener");
       }
       return;
     }
+    // Menu toggles (e.g. the mobile ☰ button) keep working, so their contents can be edited too.
+    const toggle = (e.target as Element).closest("button[aria-controls]");
+    const found = locate(e.clientX, e.clientY, e.target as Element);
+    if (toggle && !found) {
+      setTarget(null);
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
-    const found = locate(e.clientX, e.clientY, e.target as Element);
     setTarget(found);
     setShowHelp(false);
   }
@@ -446,19 +465,16 @@ export function InlineEditor({
 
       {/* Editor toolbar */}
       <div className="fixed bottom-4 left-1/2 z-[75] flex w-[min(60rem,calc(100vw-1rem))] -translate-x-1/2 flex-wrap items-center gap-2 border border-grey-800 bg-ink px-3 py-2 font-sans text-paper shadow-2xl">
-        <Link href="/admin" className="px-2 py-1.5 text-sm text-grey-300 hover:text-amber" title="Back to dashboard">
+        <a href="/admin" className="px-2 py-1.5 text-sm text-grey-300 hover:text-amber" title="Back to dashboard">
           ← Dashboard
-        </Link>
+        </a>
         <label className="sr-only" htmlFor="page-switch">
           Page
         </label>
         <select
           id="page-switch"
           value={page.id}
-          onChange={async (e) => {
-            await save();
-            router.push(`/admin/edit/${e.target.value}`);
-          }}
+          onChange={(e) => void goToPage(e.target.value)}
           className="max-w-44 border border-grey-700 bg-grey-900 px-2 py-1.5 text-sm text-paper"
         >
           {EDITABLE_PAGES.map((p) => (
