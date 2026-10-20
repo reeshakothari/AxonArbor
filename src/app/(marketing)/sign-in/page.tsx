@@ -1,29 +1,14 @@
-import { Container } from "@/components/layout/Container";
-import { PageHeader } from "@/components/sections/PageHeader";
-import { ButtonLink } from "@/components/ui/Button";
-import { signIn } from "@/content/contact";
-import { site } from "@/content/site";
+import type { Metadata } from "next";
+import { getContent } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
+import { SignInView } from "@/views/SignInView";
 
-export const metadata = pageMetadata(signIn.meta);
+export async function generateMetadata(): Promise<Metadata> {
+  const [page, site] = await Promise.all([getContent("sign-in"), getContent("site")]);
+  return pageMetadata(page.meta, site.name);
+}
 
-export default function SignInPage() {
-  return (
-    <>
-      <PageHeader {...signIn.header} />
-      <Container className="flex flex-wrap items-center gap-8 py-16 sm:py-20">
-        <ButtonLink href="/">Back to home</ButtonLink>
-        <p className="text-grey-600">
-          Need access sooner? Email{" "}
-          <a
-            href={`mailto:${site.contact.email}`}
-            className="text-ink underline decoration-amber decoration-2 underline-offset-4"
-          >
-            {site.contact.email}
-          </a>
-          .
-        </p>
-      </Container>
-    </>
-  );
+export default async function Page() {
+  const [signIn, site] = await Promise.all([getContent("sign-in"), getContent("site")]);
+  return <SignInView signIn={signIn} site={site} />;
 }

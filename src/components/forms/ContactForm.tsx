@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import type { ContactContent } from "@/content/types";
 import {
   contactFields,
   normaliseContact,
@@ -12,13 +13,18 @@ import {
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-type Props = {
-  submitLabel: string;
-  successHeading: string;
-  successBody: string;
-};
+type Props = ContactContent["form"];
 
-export function ContactForm({ submitLabel, successHeading, successBody }: Props) {
+export function ContactForm({
+  labels,
+  requiredNote,
+  submitLabel,
+  sendingLabel,
+  successHeading,
+  successBody,
+  sendAnotherLabel,
+  errorMessage,
+}: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
   const [errors, setErrors] = useState<ContactErrors>({});
@@ -80,7 +86,7 @@ export function ContactForm({ submitLabel, successHeading, successBody }: Props)
         <h2 className="font-serif text-3xl tracking-tight">{successHeading}</h2>
         <p className="mt-4 leading-relaxed text-grey-600">{successBody}</p>
         <Button variant="outline" className="mt-8" onClick={() => setStatus("idle")}>
-          Send another message
+          {sendAnotherLabel}
         </Button>
       </div>
     );
@@ -89,8 +95,7 @@ export function ContactForm({ submitLabel, successHeading, successBody }: Props)
   return (
     <form ref={formRef} noValidate onSubmit={onSubmit} aria-describedby="form-note">
       <p id="form-note" className="mb-8 text-sm text-grey-600">
-        Fields marked <span aria-hidden="true">*</span>
-        <span className="sr-only">with an asterisk</span> are required.
+        {requiredNote}
       </p>
 
       {/* Honeypot for bots; hidden from people and assistive technology. */}
@@ -129,7 +134,7 @@ export function ContactForm({ submitLabel, successHeading, successBody }: Props)
           return (
             <div key={field.name} className={field.type === "textarea" ? "sm:col-span-2" : undefined}>
               <label htmlFor={id} className="eyebrow text-grey-700">
-                {field.label}
+                {labels[field.name] || field.label}
                 {field.required && <span aria-hidden="true"> *</span>}
               </label>
               {field.type === "textarea" ? (
@@ -150,10 +155,10 @@ export function ContactForm({ submitLabel, successHeading, successBody }: Props)
 
       <div className="mt-10 flex flex-wrap items-center gap-6">
         <Button type="submit" arrow disabled={status === "submitting"}>
-          {status === "submitting" ? "Sending…" : submitLabel}
+          {status === "submitting" ? sendingLabel : submitLabel}
         </Button>
         <p role="alert" className="text-sm text-ink">
-          {status === "error" && "Sorry, something went wrong. Please try again, or email us directly."}
+          {status === "error" && errorMessage}
         </p>
       </div>
     </form>

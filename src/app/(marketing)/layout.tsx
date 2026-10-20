@@ -1,18 +1,7 @@
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
+import { getContent } from "@/lib/content";
+import { SiteChrome } from "@/views/SiteChrome";
 
-export default function MarketingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <>
-      <Header />
-      <main id="main" className="flex-1">
-        {children}
-      </main>
-      <Footer />
-    </>
-  );
+export default async function MarketingLayout({ children }: { children: React.ReactNode }) {
+  const site = await getContent("site");
+  return <SiteChrome site={site}>{children}</SiteChrome>;
 }

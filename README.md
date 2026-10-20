@@ -15,8 +15,8 @@ npm run lint
 src/
   app/
     (marketing)/        public pages: /, /programmes, /hospitality, /about, /contact, /sign-in
-    (app)/              reserved for phase 2 dashboards (see its README)
-    api/contact/        contact form route handler (validates + logs for now)
+    admin/              admin dashboard: login, inline page editor, enquiries, images, history
+    api/contact/        contact form route handler (stores enquiries in Supabase)
     sitemap.ts, robots.ts, icon.png, apple-icon.png, opengraph-image.png
   components/
     layout/             Header, Footer, Logo, Container
@@ -25,14 +25,40 @@ src/
     forms/              ContactForm
     motion/             MotionProvider (Framer Motion, problem section only), Reveal (CSS)
     ui/                 Button, Eyebrow, SectionIntro
-  content/              all page copy as typed objects (types.ts describes the model)
-  lib/                  metadata helper, shared contact validation
+  views/                page bodies, shared by the public site and the inline editor
+  content/              default copy as typed objects (types.ts describes the model)
+  lib/                  content loader, Supabase clients, admin data access, stega markers
+  proxy.ts              refreshes the admin session cookie on /admin requests
+supabase/migrations/    SQL for the Axon Arbor tables, functions and media bucket
 ```
 
-## Editing content
+## Editing content (admin)
 
-All copy lives in `src/content/*.ts`, typed by `src/content/types.ts`. Components never
-hard-code copy, so this layer can later be swapped for a CMS or Supabase.
+Admins edit the site at **/admin** without touching code:
+
+- **Edit website**: the real pages with draft content. Click any text to change it, click any
+  image to upload or pick a replacement, and use *All settings* for links, lists, menu items
+  and search-engine text. Edits autosave as drafts.
+- **Publish** copies drafts live and expires the `axon-arbor-content` cache tag, so the public
+  site updates on the next visit with no redeploy. Every publish is kept in *Publish history*
+  and can be restored.
+- **Enquiries**: contact form submissions (read/unread, archive, notes, CSV export).
+- **Images**: the `axon-arbor-media` storage bucket.
+
+How it works: `src/content/*.ts` are the defaults. Supabase (`axon_arbor_content`, one draft
+and one published row per page) stores edited copies, which `src/lib/content.ts` merges over
+the defaults. In the editor every display string carries invisible zero-width markers
+(`src/lib/stega.ts`) so a click on rendered text maps back to its field.
+
+### Supabase
+
+Project `supabase-charcoal-planet` is shared with other sites, so every object is prefixed
+`axon_arbor_` and editing is limited to users in `axon_arbor_admins`. Run
+`supabase/migrations/20261020000000_axon_arbor_cms.sql` once, then add an admin:
+
+1. Supabase dashboard → Authentication → Users → *Add user* (email + password, auto-confirm).
+2. SQL editor:
+   `insert into public.axon_arbor_admins (user_id, email) select id, email from auth.users where email = 'admin@example.com';`
 
 ## Brand rules
 
@@ -55,8 +81,10 @@ hard-code copy, so this layer can later be swapped for a CMS or Supabase.
 | Variable               | Default                    | Purpose                              |
 | ---------------------- | -------------------------- | ------------------------------------ |
 | `NEXT_PUBLIC_SITE_URL` | `https://www.axonarbor.in` | Canonical URLs, sitemap, OG metadata |
+| `NEXT_PUBLIC_SUPABASE_URL` | project URL | Supabase project (defaults to supabase-charcoal-planet) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | project key | Publishable key (safe to expose; RLS protects data) |
 
 ## TODO
 
-- Contact form: deliver enquiries by email (`src/app/api/contact/route.ts`).
-- Phase 2: dashboards, onboarding and admin panel in `(app)`.
+- Contact form: also notify the team by email (`src/app/api/contact/route.ts`).
+- Phase 2: consultant and organisation dashboards, onboarding.

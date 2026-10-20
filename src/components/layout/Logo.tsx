@@ -1,28 +1,28 @@
 import Image from "next/image";
 import Link from "next/link";
-import { site } from "@/content/site";
+import type { ImageAsset } from "@/content/types";
 
 type LogoProps = {
+  logo: ImageAsset;
+  name: string;
   /** "light" for white backgrounds, "dark" for black. */
   tone?: "light" | "dark";
   className?: string;
 };
 
 /**
- * The brand mark is used unaltered from /public/brand/logo.png. The file has
- * generous built-in padding, so the frame crops into it with CSS only.
+ * The brand mark is used unaltered. The default file has generous built-in
+ * padding, so the frame crops into it with CSS only.
  */
-export function LogoMark({ size = 44 }: { size?: number }) {
+export function LogoMark({ logo, size = 44 }: { logo: ImageAsset; size?: number }) {
+  if (!logo.src) return null;
   return (
-    <span
-      className="relative block shrink-0 overflow-hidden"
-      style={{ width: size, height: size }}
-    >
+    <span className="relative block shrink-0 overflow-hidden" style={{ width: size, height: size }}>
       <Image
-        src={site.logo.src}
+        src={logo.src}
         alt=""
-        width={site.logo.width}
-        height={site.logo.height}
+        width={logo.width || 690}
+        height={logo.height || 615}
         sizes={`${Math.round(size * 1.6)}px`}
         loading="eager"
         className="absolute inset-0 h-full w-full origin-[50%_46%] scale-[1.55] object-cover"
@@ -31,20 +31,20 @@ export function LogoMark({ size = 44 }: { size?: number }) {
   );
 }
 
-export function Logo({ tone = "light", className = "" }: LogoProps) {
+export function Logo({ logo, name, tone = "light", className = "" }: LogoProps) {
   return (
     <Link
       href="/"
       className={`group inline-flex items-center gap-2.5 ${className}`}
-      aria-label={`${site.name} home`}
+      aria-label={`${name} home`}
     >
-      <LogoMark />
+      <LogoMark logo={logo} />
       <span
         className={`font-serif text-xl leading-none font-semibold tracking-tight ${
           tone === "dark" ? "text-paper" : "text-ink"
         }`}
       >
-        Axon Arbor
+        {name}
       </span>
     </Link>
   );

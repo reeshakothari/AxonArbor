@@ -2,6 +2,7 @@
 
 import { m } from "framer-motion";
 import { useId } from "react";
+import { visibleLength } from "@/lib/stega";
 
 const W = 600;
 const H = 540;
@@ -46,7 +47,7 @@ function ringPosition(i: number, total: number) {
 
 function labelOffset(label: string, size: number, resolved: boolean, cos: number, sin: number) {
   if (!resolved) return { x: 0, y: size * 2.5 };
-  const halfWidth = label.length * size * 0.37;
+  const halfWidth = visibleLength(label) * size * 0.37;
   return { x: cos * (size * 1.7 + halfWidth * Math.abs(cos)), y: sin * size * 2.1 + size * 0.38 };
 }
 
@@ -87,7 +88,7 @@ export function VendorConstellation({
             const visible = resolved ? i === 1 : i === 0;
             return (
               <m.p
-                key={s.value}
+                key={i}
                 aria-hidden={!visible}
                 className="absolute inset-0 flex items-end gap-4"
                 initial={false}
@@ -204,7 +205,7 @@ export function VendorConstellation({
           const offset = labelOffset(label, labelSize, resolved, ring.cos, ring.sin);
           return (
             <m.g
-              key={label}
+              key={i}
               initial={false}
               animate={{ x: resolved ? ring.x : sx, y: resolved ? ring.y : sy }}
               transition={{ duration: 1.1, ease, delay: resolved ? i * 0.03 : 0 }}

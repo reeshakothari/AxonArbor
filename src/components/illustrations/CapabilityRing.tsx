@@ -13,7 +13,17 @@ function point(angle: number, radius = R) {
  * The 360 stack as a ring of four arcs, one per capability column. Hovering a
  * column highlights its arc (pure CSS via :has, see `.stack` in globals.css).
  */
-export function CapabilityRing({ count = 4, className = "" }: { count?: number; className?: string }) {
+export function CapabilityRing({
+  count = 4,
+  value = "360",
+  label = "Capability",
+  className = "",
+}: {
+  count?: number;
+  value?: string;
+  label?: string;
+  className?: string;
+}) {
   const span = 360 / count;
   return (
     <svg viewBox="0 0 200 200" fill="none" className={className}>
@@ -47,7 +57,7 @@ export function CapabilityRing({ count = 4, className = "" }: { count?: number; 
         );
       })}
       <text x={C} y={C + 6} textAnchor="middle" className="fill-ink font-label text-[34px] font-bold tracking-tight">
-        360
+        {value}
       </text>
       <text
         x={C}
@@ -55,7 +65,7 @@ export function CapabilityRing({ count = 4, className = "" }: { count?: number; 
         textAnchor="middle"
         className="fill-grey-500 font-label text-[7px] font-semibold tracking-[0.2em] uppercase"
       >
-        Capability
+        {label}
       </text>
     </svg>
   );

@@ -5,9 +5,12 @@ import { Reveal } from "@/components/motion/Reveal";
 import { SectionIntro } from "@/components/ui/SectionIntro";
 import type { CapabilityColumn, SectionIntro as SectionIntroContent } from "@/content/types";
 
-type Props = SectionIntroContent & { columns: CapabilityColumn[] };
+type Props = SectionIntroContent & {
+  ring: { value: string; label: string };
+  columns: CapabilityColumn[];
+};
 
-export function CapabilityStack({ eyebrow, heading, lede, columns }: Props) {
+export function CapabilityStack({ eyebrow, heading, lede, ring, columns }: Props) {
   return (
     <section
       aria-labelledby="capability-heading"
@@ -19,14 +22,14 @@ export function CapabilityStack({ eyebrow, heading, lede, columns }: Props) {
             <SectionIntro id="capability-heading" eyebrow={eyebrow} heading={heading} lede={lede} />
           </Reveal>
           <Draw className="hidden shrink-0 lg:block">
-            <CapabilityRing count={columns.length} className="size-56" />
+            <CapabilityRing count={columns.length} value={ring.value} label={ring.label} className="size-56" />
           </Draw>
         </div>
 
         <div className="mt-16 grid gap-px border border-grey-200 bg-grey-200 sm:grid-cols-2 lg:grid-cols-4">
           {columns.map((column, i) => (
             <Reveal
-              key={column.title}
+              key={i}
               delay={i * 0.08}
               className="group relative bg-paper"
             >
@@ -36,14 +39,14 @@ export function CapabilityStack({ eyebrow, heading, lede, columns }: Props) {
                   className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-amber transition-transform duration-500 group-hover:scale-x-100"
                 />
                 <p className="font-label text-xs font-semibold tracking-[0.18em] text-grey-500">
-                  0{i + 1}
+                  {String(i + 1).padStart(2, "0")}
                 </p>
                 <h3 className="mt-4 font-serif text-2xl leading-tight sm:min-h-[2.5em]">
                   {column.title}
                 </h3>
                 <ul className="mt-6 space-y-3 border-t border-grey-200 pt-6">
-                  {column.items.map((item) => (
-                    <li key={item} className="flex gap-3 text-[0.95rem] leading-snug text-grey-700">
+                  {column.items.map((item, j) => (
+                    <li key={j} className="flex gap-3 text-[0.95rem] leading-snug text-grey-700">
                       <span aria-hidden="true" className="mt-[0.55em] h-px w-3 shrink-0 bg-grey-400" />
                       {item}
                     </li>

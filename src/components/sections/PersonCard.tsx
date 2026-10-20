@@ -15,7 +15,7 @@ export function PersonCard({ person, headingLevel = "h3" }: { person: Person; he
   return (
     <article className="flex h-full flex-col">
       <div className="img-reveal relative aspect-[4/5] overflow-hidden bg-grey-100">
-        {person.image ? (
+        {person.image?.src ? (
           <Image
             src={person.image.src}
             alt={person.image.alt}

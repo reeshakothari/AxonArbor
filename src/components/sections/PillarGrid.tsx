@@ -18,7 +18,7 @@ export function PillarGrid({ eyebrow, heading, lede, pillars }: Props) {
           {pillars.map((pillar, i) => (
             <Reveal
               as="li"
-              key={pillar.title}
+              key={i}
               delay={i * 0.12}
               className="border-b border-grey-200 py-10 lg:border-b-0 lg:py-12 lg:pr-10 lg:not-first:border-l lg:not-first:pl-10"
             >

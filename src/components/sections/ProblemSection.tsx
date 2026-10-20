@@ -90,7 +90,7 @@ export function ProblemSection({ content }: { content: ProblemContent }) {
                     const dimmed = stage >= 0 && !active;
                     return (
                       <li
-                        key={point.title}
+                        key={i}
                         className={`border-b border-grey-200 py-5 transition-colors duration-500 lg:py-3.5 ${
                           dimmed ? "lg:text-grey-400" : ""
                         }`}

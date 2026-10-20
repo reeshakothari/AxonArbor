@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
+    // Images uploaded through the admin live in the Supabase media bucket.
+    remotePatterns: [new URL("https://geajhjiceaocsljqffkh.supabase.co/storage/v1/object/public/axon-arbor-media/**")],
   },
   // Keep links to the old Odoo site (axonarbor.in) working.
   async redirects() {

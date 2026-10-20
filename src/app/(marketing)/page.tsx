@@ -1,32 +1,17 @@
 import type { Metadata } from "next";
-import { BeyondTraining } from "@/components/sections/BeyondTraining";
-import { CapabilityStack } from "@/components/sections/CapabilityStack";
-import { CTABand } from "@/components/sections/CTABand";
-import { Hero } from "@/components/sections/Hero";
-import { PillarGrid } from "@/components/sections/PillarGrid";
-import { ProblemSection } from "@/components/sections/ProblemSection";
-import { PullQuote } from "@/components/sections/PullQuote";
-import { Ticker } from "@/components/sections/Ticker";
-import { home } from "@/content/home";
-import { programmes } from "@/content/programmes";
+import { getContent } from "@/lib/content";
+import { HomeView } from "@/views/HomeView";
 
-export const metadata: Metadata = {
-  title: { absolute: `Axon Arbor | ${home.meta.title}` },
-  description: home.meta.description,
-  alternates: { canonical: home.meta.path },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [home, site] = await Promise.all([getContent("home"), getContent("site")]);
+  return {
+    title: { absolute: `${site.name} | ${home.meta.title}` },
+    description: home.meta.description,
+    alternates: { canonical: home.meta.path },
+  };
+}
 
-export default function HomePage() {
-  return (
-    <>
-      <Hero {...home.hero} />
-      <ProblemSection content={home.problem} />
-      <PullQuote {...home.pullQuote} />
-      <PillarGrid {...home.ecosystem} />
-      <CapabilityStack {...home.capabilityStack} />
-      <Ticker label={programmes.areas.heading} items={programmes.areas.items} />
-      <BeyondTraining {...home.beyondTraining} />
-      <CTABand {...home.cta} />
-    </>
-  );
+export default async function HomePage() {
+  const [home, programmes] = await Promise.all([getContent("home"), getContent("programmes")]);
+  return <HomeView home={home} programmes={programmes} />;
 }

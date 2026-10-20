@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Gelasio, Inter, Montserrat } from "next/font/google";
-import { site } from "@/content/site";
+import { siteUrl } from "@/content/site";
+import { getContent } from "@/lib/content";
 import "./globals.css";
 
 // Only the faces used above the fold on every page are preloaded.
@@ -31,29 +32,26 @@ const montserrat = Montserrat({
   preload: false,
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
-  title: {
-    default: `${site.name} | ${site.tagline}`,
-    template: `%s | ${site.name}`,
-  },
-  description: site.description,
-  applicationName: site.name,
-  openGraph: {
-    type: "website",
-    locale: "en_GB",
-    siteName: site.name,
-    url: "/",
-    title: `${site.name} | ${site.tagline}`,
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getContent("site");
+  const title = `${site.name} | ${site.tagline}`;
+  return {
+    metadataBase: new URL(siteUrl),
+    title: { default: title, template: `%s | ${site.name}` },
     description: site.description,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${site.name} | ${site.tagline}`,
-    description: site.description,
-  },
-  alternates: { canonical: "/" },
-};
+    applicationName: site.name,
+    openGraph: {
+      type: "website",
+      locale: "en_GB",
+      siteName: site.name,
+      url: "/",
+      title,
+      description: site.description,
+    },
+    twitter: { card: "summary_large_image", title, description: site.description },
+    alternates: { canonical: "/" },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#000000",

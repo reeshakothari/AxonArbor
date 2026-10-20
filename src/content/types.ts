@@ -1,7 +1,7 @@
 /**
- * Content model for the marketing site. Every page reads its copy from typed
- * objects in src/content so the source can later move to a CMS or Supabase
- * without touching components.
+ * Content model for the marketing site. The objects in src/content are the
+ * defaults; the admin dashboard (/admin) stores edited copies in Supabase,
+ * which are merged over these defaults at render time (see src/lib/content.ts).
  */
 
 export type Link = {
@@ -81,7 +81,10 @@ export type HomeContent = {
   problem: ProblemContent;
   pullQuote: { parts: QuotePart[]; caption: string };
   ecosystem: SectionIntro & { pillars: Item[] };
-  capabilityStack: SectionIntro & { columns: CapabilityColumn[] };
+  capabilityStack: SectionIntro & {
+    ring: { value: string; label: string };
+    columns: CapabilityColumn[];
+  };
   beyondTraining: SectionIntro & { items: LinkedItem[] };
   cta: CtaContent;
 };
@@ -133,6 +136,7 @@ export type HospitalityContent = {
   meta: PageMeta;
   header: PageHeaderContent;
   intro: string[];
+  specialismsLabel: string;
   segments: HospitalitySegment[];
   cta: CtaContent;
 };
@@ -154,17 +158,68 @@ export type AboutContent = {
   cta: CtaContent;
 };
 
+export type ContactFieldLabels = {
+  name: string;
+  organisation: string;
+  role: string;
+  email: string;
+  phone: string;
+  message: string;
+};
+
 export type ContactContent = {
   meta: PageMeta;
   header: PageHeaderContent;
   form: {
+    labels: ContactFieldLabels;
+    requiredNote: string;
     submitLabel: string;
+    sendingLabel: string;
     successHeading: string;
     successBody: string;
+    sendAnotherLabel: string;
+    errorMessage: string;
+  };
+  details: {
+    visitHeading: string;
+    emailHeading: string;
+    callHeading: string;
   };
 };
 
 export type SignInContent = {
   meta: PageMeta;
   header: PageHeaderContent;
+  button: Link;
+  helpText: string;
+};
+
+export type SiteContent = {
+  name: string;
+  legalName: string;
+  tagline: string;
+  description: string;
+  logo: ImageAsset;
+  nav: Link[];
+  signIn: Link;
+  skipLinkLabel: string;
+  contact: {
+    email: string;
+    phone: string;
+    phoneHref: string;
+    address: string[];
+  };
+  footer: {
+    blurb: string;
+    exploreHeading: string;
+    contactHeading: string;
+    location: string;
+    copyright: string;
+  };
+  notFound: {
+    eyebrow: string;
+    heading: string;
+    body: string;
+    button: Link;
+  };
 };

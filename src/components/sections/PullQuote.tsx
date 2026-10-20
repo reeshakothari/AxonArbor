@@ -14,10 +14,10 @@ export function PullQuote({ parts, caption }: { parts: QuotePart[]; caption: str
           <span aria-hidden="true" className="pq-rule block h-0.5 w-16 origin-left bg-amber" />
           <blockquote className="mt-10 font-serif text-[clamp(2.4rem,7.4vw,7rem)] leading-[1.02] tracking-[-0.025em] text-balance">
             <p>
-              {parts.map((part) =>
+              {parts.map((part, i) =>
                 part.tone ? (
                   <span
-                    key={part.text}
+                    key={i}
                     className={`inline-block ${
                       part.tone === "heavy"
                         ? "pq-heavy font-bold"
@@ -27,7 +27,7 @@ export function PullQuote({ parts, caption }: { parts: QuotePart[]; caption: str
                     {part.text}
                   </span>
                 ) : (
-                  <span key={part.text}>{part.text}</span>
+                  <span key={i}>{part.text}</span>
                 ),
               )}
             </p>

@@ -1,0 +1,121 @@
+import type { Path } from "./paths";
+
+/** Plain-English names for content fields, shown to admins. */
+const LABELS: Record<string, string> = {
+  meta: "Search engines & sharing",
+  title: "Title",
+  description: "Description",
+  eyebrow: "Small label above the heading",
+  heading: "Heading",
+  lede: "Intro text",
+  body: "Text",
+  label: "Text",
+  href: "Links to",
+  cta: "Button",
+  primaryCta: "Main button",
+  secondaryCta: "Second button",
+  hero: "Top of page (hero)",
+  problem: "The problem section",
+  pullQuote: "Big quote",
+  parts: "Quote pieces",
+  tone: "Style",
+  caption: "Caption",
+  ecosystem: "One Partner section",
+  pillars: "Pillars",
+  capabilityStack: "360 Capability Stack",
+  ring: "Ring in the middle",
+  columns: "Columns",
+  items: "Items",
+  beyondTraining: "Beyond Training section",
+  stat: "Big number (before)",
+  resolvedStat: "Big number (after)",
+  value: "Number",
+  vendors: "Vendor names in the diagram",
+  painPoints: "Pain points",
+  resolution: "Closing line",
+  header: "Page heading",
+  intro: "Intro paragraphs",
+  areas: "Areas we cover",
+  note: "Note",
+  programmes: "Programmes",
+  listLabel: "List heading",
+  list: "List",
+  segments: "Sections",
+  specialisms: "We specialise in (list)",
+  specialismsLabel: "“We specialise in” label",
+  paragraphs: "Paragraphs",
+  image: "Image",
+  logo: "Logo",
+  founder: "Founder",
+  advisors: "Advisors",
+  facilitators: "Facilitators",
+  people: "People",
+  partners: "Partners",
+  kind: "Type of partner",
+  stats: "Numbers",
+  role: "Role",
+  bio: "Biography",
+  name: "Name",
+  form: "Contact form",
+  labels: "Field labels",
+  details: "Contact details panel",
+  nav: "Main menu",
+  signIn: "Sign-in link",
+  skipLinkLabel: "“Skip to content” link (for keyboard users)",
+  contact: "Contact details",
+  address: "Address lines",
+  phoneHref: "Phone link (tel:)",
+  footer: "Footer",
+  blurb: "Short description",
+  notFound: "404 page (broken links)",
+  button: "Button",
+  helpText: "Help text",
+  legalName: "Company legal name",
+  tagline: "Tagline",
+  copyright: "Copyright line",
+  alt: "Image description (for screen readers and Google)",
+};
+
+/** Names for the top-level sections of a page, where the generic label is ambiguous. */
+const SECTION_LABELS: Record<string, string> = {
+  cta: "Call-to-action band (bottom of page)",
+  header: "Page heading",
+  contact: "Contact details",
+};
+
+export function sectionLabel(key: string): string {
+  return SECTION_LABELS[key] ?? humanise(key);
+}
+
+export function humanise(key: string): string {
+  if (LABELS[key]) return LABELS[key];
+  const words = key.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[-_]/g, " ").toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/** "Hero › Main button › Text" style breadcrumb for a field. */
+export function describePath(path: Path): string {
+  const parts: string[] = [];
+  for (const key of path) {
+    if (typeof key === "number") parts[parts.length - 1] = `${parts[parts.length - 1] ?? "Item"} ${key + 1}`;
+    else parts.push(humanise(key));
+  }
+  return parts.join(" › ");
+}
+
+/** Fields that read better as a multi-line box. */
+export function isLongText(key: string | number, value: string) {
+  return (
+    value.length > 70 ||
+    ["body", "lede", "description", "bio", "resolution", "blurb", "note", "helpText", "errorMessage", "successBody"].includes(
+      String(key),
+    ) ||
+    typeof key === "number"
+  );
+}
+
+/** Keys that hold technical values (links, file paths, ids), never shown as page text. */
+export const NON_DISPLAY_KEYS = new Set(["href", "src", "icon", "tone", "id", "path", "phoneHref", "alt", "width", "height"]);
+
+/** Keys the admin never needs to see. */
+export const HIDDEN_KEYS = new Set(["width", "height", "path", "id"]);

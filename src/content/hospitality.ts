@@ -18,6 +18,7 @@ export const hospitality: HospitalityContent = {
     "Structured training builds service intuition, emotional intelligence and operational precision, so teams anticipate needs rather than react to them.",
     "Organisations that prioritise continuous learning create differentiated service standards, stronger teams and measurable commercial outcomes across every customer interaction.",
   ],
+  specialismsLabel: "We specialise in",
 
   segments: [
     {

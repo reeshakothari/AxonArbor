@@ -97,6 +97,7 @@ export const home: HomeContent = {
     eyebrow: "Our offerings",
     heading: "The Axon Arbor 360 Capability Stack",
     lede: "Four layers that work as one system, from understanding where you are today to changing how your organisation works.",
+    ring: { value: "360", label: "Capability" },
     columns: [
       {
         title: "Assess & Diagnose",

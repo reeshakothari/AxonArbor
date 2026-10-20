@@ -55,7 +55,7 @@ export function BeyondTraining({ eyebrow, heading, lede, items }: Props) {
             );
             const row = "group flex items-start gap-6 border-b border-grey-200 py-9 sm:gap-10";
             return (
-              <Reveal as="li" key={item.title} delay={i * 0.1}>
+              <Reveal as="li" key={i} delay={i * 0.1}>
                 {item.href ? (
                   <Link href={item.href} className={`${row} transition-colors hover:bg-grey-50`}>
                     {body}

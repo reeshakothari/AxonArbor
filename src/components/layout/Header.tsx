@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
-import { mainNav, signInLink } from "@/content/site";
+import type { SiteContent } from "@/content/types";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
 
@@ -11,7 +11,12 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export function Header() {
+type HeaderProps = {
+  site: Pick<SiteContent, "name" | "logo" | "nav" | "signIn" | "skipLinkLabel">;
+};
+
+export function Header({ site }: HeaderProps) {
+  const { nav: mainNav, signIn: signInLink } = site;
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [openedAt, setOpenedAt] = useState(pathname);
@@ -43,17 +48,17 @@ export function Header() {
           href="#main"
           className="eyebrow sr-only bg-amber px-4 py-3 text-ink focus:not-sr-only focus:absolute focus:top-2 focus:left-2"
         >
-          Skip to content
+          {site.skipLinkLabel}
         </a>
         <Container className="flex h-16 items-center justify-between gap-6 lg:h-[72px]">
-          <Logo />
+          <Logo logo={site.logo} name={site.name} />
 
           <nav aria-label="Main" className="hidden lg:block">
             <ul className="flex items-center gap-8">
               {links.map((link) => {
                 const active = isActive(pathname, link.href);
                 return (
-                  <li key={link.href}>
+                  <li key={`${link.href}-${link.label}`}>
                     <Link
                       href={link.href}
                       aria-current={active ? "page" : undefined}
@@ -128,7 +133,7 @@ export function Header() {
             {mainNav.map((link) => {
               const active = isActive(pathname, link.href);
               return (
-                <li key={link.href}>
+                <li key={`${link.href}-${link.label}`}>
                   <Link
                     href={link.href}
                     aria-current={active ? "page" : undefined}
