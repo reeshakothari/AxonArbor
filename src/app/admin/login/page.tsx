@@ -13,7 +13,7 @@ export default function AdminLoginPage() {
         </p>
         <h1 className="mt-5 font-serif text-4xl tracking-tight">Sign in to edit your website</h1>
         <p className="mt-3 text-grey-600">
-          Use the email and password set up for you. Only approved Axon Arbor admins can sign in here.
+          Use the admin username and password for this website.
         </p>
         <div className="mt-10 border border-grey-200 bg-paper p-8 shadow-sm">
           <LoginForm />

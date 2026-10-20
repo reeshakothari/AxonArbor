@@ -45,7 +45,7 @@ export function HistoryList({ versions }: { versions: Version[] }) {
                 {formatDate(v.published_at)}
                 {i === 0 && <span className="eyebrow ml-3 bg-amber px-2 py-0.5 text-[0.6rem] text-ink">Live now</span>}
               </p>
-              <p className="text-sm text-grey-600">Published by {v.published_by_email ?? "an admin"}</p>
+              <p className="text-sm text-grey-600">Published by {v.published_by ?? "an admin"}</p>
             </div>
             {i > 0 && (
               <AdminButton size="sm" onClick={() => setTarget(v)}>

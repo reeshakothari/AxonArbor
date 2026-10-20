@@ -22,7 +22,7 @@ export type Submission = {
 export type Version = {
   id: number;
   published_at: string;
-  published_by_email: string | null;
+  published_by: string | null;
 };
 
 async function contentRows({ supabase }: AdminSession, key?: ContentKey): Promise<Row[]> {
@@ -97,7 +97,7 @@ export async function countNewSubmissions({ supabase }: AdminSession): Promise<n
 export async function getVersions({ supabase }: AdminSession): Promise<Version[]> {
   const { data, error } = await supabase
     .from(TABLES.versions)
-    .select("id, published_at, published_by_email")
+    .select("id, published_at, published_by")
     .order("published_at", { ascending: false })
     .limit(50);
   if (error) throw new Error(`Could not load history: ${error.message}`);

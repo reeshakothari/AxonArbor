@@ -28,7 +28,6 @@ src/
   views/                page bodies, shared by the public site and the inline editor
   content/              default copy as typed objects (types.ts describes the model)
   lib/                  content loader, Supabase clients, admin data access, stega markers
-  proxy.ts              refreshes the admin session cookie on /admin requests
 supabase/migrations/    SQL for the Axon Arbor tables, functions and media bucket
 ```
 
@@ -50,15 +49,19 @@ and one published row per page) stores edited copies, which `src/lib/content.ts`
 the defaults. In the editor every display string carries invisible zero-width markers
 (`src/lib/stega.ts`) so a click on rendered text maps back to its field.
 
-### Supabase
+### Admin login and Supabase
+
+Admin sign-in does **not** use Supabase Auth. The username and password come from the
+environment (`ADMIN_USERNAME`, `ADMIN_PASSWORD`); a signed, http-only cookie
+(`ADMIN_SESSION_SECRET`) keeps the admin signed in for 7 days. All admin reads and writes go
+through server actions that check that cookie, then use the Supabase secret key
+(`SUPABASE_SECRET_KEY`, server-only). Image uploads use short-lived signed upload URLs.
 
 Project `supabase-charcoal-planet` is shared with other sites, so every object is prefixed
-`axon_arbor_` and editing is limited to users in `axon_arbor_admins`. Run
-`supabase/migrations/20261020000000_axon_arbor_cms.sql` once, then add an admin:
+`axon_arbor_`. The public (anon) role can only read published content and submit the contact
+form. Run `supabase/migrations/20261020000000_axon_arbor_cms.sql` once.
 
-1. Supabase dashboard → Authentication → Users → *Add user* (email + password, auto-confirm).
-2. SQL editor:
-   `insert into public.axon_arbor_admins (user_id, email) select id, email from auth.users where email = 'admin@example.com';`
+Copy `.env.example` to `.env.local` and fill it in. Add the same variables to the Vercel project.
 
 ## Brand rules
 
@@ -80,6 +83,9 @@ Project `supabase-charcoal-planet` is shared with other sites, so every object i
 
 | Variable               | Default                    | Purpose                              |
 | ---------------------- | -------------------------- | ------------------------------------ |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | (required) | Admin dashboard login |
+| `ADMIN_SESSION_SECRET` | (required) | Signs the admin session cookie (long random string) |
+| `SUPABASE_SECRET_KEY` | (required for admin) | Supabase secret key, server-only |
 | `NEXT_PUBLIC_SITE_URL` | `https://www.axonarbor.in` | Canonical URLs, sitemap, OG metadata |
 | `NEXT_PUBLIC_SUPABASE_URL` | project URL | Supabase project (defaults to supabase-charcoal-planet) |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | project key | Publishable key (safe to expose; RLS protects data) |

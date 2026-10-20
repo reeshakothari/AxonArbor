@@ -11,14 +11,12 @@ export const SUPABASE_PUBLISHABLE_KEY =
 
 /** All Axon Arbor objects are prefixed: the project is shared with other sites. */
 export const TABLES = {
-  admins: "axon_arbor_admins",
   content: "axon_arbor_content",
   versions: "axon_arbor_content_versions",
   submissions: "axon_arbor_submissions",
 } as const;
 
 export const RPC = {
-  isAdmin: "axon_arbor_is_admin",
   publish: "axon_arbor_publish",
   discardDraft: "axon_arbor_discard_draft",
   restoreVersion: "axon_arbor_restore_version",

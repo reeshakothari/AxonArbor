@@ -1,7 +1,8 @@
 "use client";
 
-import { MEDIA_BUCKET, MEDIA_FOLDER } from "@/lib/supabase/config";
-import { createAdminBrowserClient } from "@/lib/supabase/browser";
+import { createUploadTarget, deleteMedia, listMedia } from "@/app/admin/actions";
+import { MEDIA_BUCKET } from "@/lib/supabase/config";
+import { createPublicClient } from "@/lib/supabase/public";
 
 export type MediaItem = { name: string; src: string; width: number; height: number; builtIn?: boolean };
 
@@ -44,57 +45,32 @@ function readDimensions(file: File): Promise<{ width: number; height: number }> 
   });
 }
 
-function slug(name: string) {
-  const dot = name.lastIndexOf(".");
-  const base = (dot > 0 ? name.slice(0, dot) : name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const ext = dot > 0 ? name.slice(dot + 1).toLowerCase() : "jpg";
-  return `${base || "image"}.${ext}`;
-}
-
-/** Uploads an image to the Axon Arbor media bucket. Dimensions are stored in the file name. */
+/**
+ * Uploads an image: the server checks the admin session and issues a signed
+ * upload URL, then the browser sends the file straight to storage.
+ */
 export async function uploadImage(file: File): Promise<MediaItem> {
   if (!ACCEPTED.includes(file.type)) throw new Error("Please choose a PNG, JPG, WebP, GIF, AVIF or SVG image.");
   if (file.size > MAX_UPLOAD_MB * 1024 * 1024) throw new Error(`Images must be smaller than ${MAX_UPLOAD_MB} MB.`);
 
   const { width, height } = await readDimensions(file);
-  const path = `${MEDIA_FOLDER}/${Date.now()}-${width}x${height}-${slug(file.name)}`;
-  const supabase = createAdminBrowserClient();
-  const { error } = await supabase.storage.from(MEDIA_BUCKET).upload(path, file, {
-    cacheControl: "31536000",
-    contentType: file.type,
-    upsert: false,
-  });
+  const target = await createUploadTarget({ name: file.name, type: file.type, size: file.size, width, height });
+  if (!target.ok) throw new Error(target.error);
+
+  const { error } = await createPublicClient()
+    .storage.from(MEDIA_BUCKET)
+    .uploadToSignedUrl(target.path, target.token, file, { contentType: file.type, cacheControl: "31536000" });
   if (error) throw new Error(`Upload failed: ${error.message}`);
-  const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path);
-  return { name: file.name, src: data.publicUrl, width, height };
+  return { name: file.name, src: target.publicUrl, width, height };
 }
 
-const DIMENSIONS_RE = /^\d+-(\d+)x(\d+)-(.+)$/;
-
 export async function listUploads(): Promise<MediaItem[]> {
-  const supabase = createAdminBrowserClient();
-  const { data, error } = await supabase.storage
-    .from(MEDIA_BUCKET)
-    .list(MEDIA_FOLDER, { limit: 500, sortBy: { column: "created_at", order: "desc" } });
-  if (error) throw new Error(`Could not load images: ${error.message}`);
-  return (data ?? [])
-    .filter((f) => f.name && !f.name.startsWith("."))
-    .map((f) => {
-      const match = f.name.match(DIMENSIONS_RE);
-      const { publicUrl } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(`${MEDIA_FOLDER}/${f.name}`).data;
-      return {
-        name: match?.[3] ?? f.name,
-        src: publicUrl,
-        width: match ? Number(match[1]) : 1200,
-        height: match ? Number(match[2]) : 800,
-      };
-    });
+  const result = await listMedia();
+  if (!result.ok) throw new Error(result.error);
+  return result.items;
 }
 
 export async function deleteUpload(src: string) {
-  const marker = `/${MEDIA_BUCKET}/`;
-  const path = decodeURIComponent(src.slice(src.indexOf(marker) + marker.length));
-  const supabase = createAdminBrowserClient();
-  const { error } = await supabase.storage.from(MEDIA_BUCKET).remove([path]);
-  if (error) throw new Error(`Could not delete: ${error.message}`);
+  const result = await deleteMedia(src);
+  if (!result.ok) throw new Error(result.error);
 }

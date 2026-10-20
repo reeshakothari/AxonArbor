@@ -1,77 +1,40 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { RPC } from "@/lib/supabase/config";
-import { createAdminBrowserClient } from "@/lib/supabase/browser";
+import { useActionState } from "react";
+import { login, type LoginState } from "@/app/admin/actions";
+
+const inputClass = "mt-2 block w-full border border-grey-300 px-4 py-3 text-base focus:border-ink focus:outline-none";
 
 export function LoginForm() {
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setPending(true);
-    const form = new FormData(event.currentTarget);
-    const supabase = createAdminBrowserClient();
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: String(form.get("email") ?? "").trim(),
-      password: String(form.get("password") ?? ""),
-    });
-    if (signInError) {
-      setPending(false);
-      setError("That email and password don’t match. Please try again.");
-      return;
-    }
-
-    // The login system is shared with other sites: check this account is an Axon Arbor admin.
-    const { data: isAdmin } = await supabase.rpc(RPC.isAdmin);
-    if (!isAdmin) {
-      await supabase.auth.signOut();
-      setPending(false);
-      setError("This account doesn’t have access to the Axon Arbor admin. Ask your site owner to add you.");
-      return;
-    }
-
-    router.replace("/admin");
-    router.refresh();
-  }
+  const [state, action, pending] = useActionState<LoginState, FormData>(login, { error: null });
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form action={action} className="space-y-6">
       <div>
-        <label htmlFor="email" className="eyebrow text-grey-700">
-          Email
+        <label htmlFor="username" className="eyebrow text-grey-700">
+          Username
         </label>
         <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
+          id="username"
+          name="username"
+          type="text"
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
           required
-          className="mt-2 block w-full border border-grey-300 px-4 py-3 text-base focus:border-ink focus:outline-none"
+          className={inputClass}
         />
       </div>
       <div>
         <label htmlFor="password" className="eyebrow text-grey-700">
           Password
         </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className="mt-2 block w-full border border-grey-300 px-4 py-3 text-base focus:border-ink focus:outline-none"
-        />
+        <input id="password" name="password" type="password" autoComplete="current-password" required className={inputClass} />
       </div>
-      {error && (
+      {state.error && (
         <p role="alert" className="flex gap-2 text-sm text-ink">
           <span aria-hidden="true" className="mt-1.5 size-1.5 shrink-0 bg-amber" />
-          {error}
+          {state.error}
         </p>
       )}
       <button
