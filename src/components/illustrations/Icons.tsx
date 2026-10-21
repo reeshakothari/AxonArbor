@@ -130,6 +130,12 @@ const ICONS: Record<IconName, (props: { className?: string }) => ReactNode> = {
   coaching: CoachingIcon,
 };
 
+export const ICON_NAMES = Object.keys(ICONS) as IconName[];
+
+export function isIconName(value: string): value is IconName {
+  return value in ICONS;
+}
+
 export function LineIcon({ name, className }: { name: IconName; className?: string }) {
   const Component = ICONS[name];
   return <Component className={className} />;

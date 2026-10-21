@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Draw } from "@/components/illustrations/Draw";
-import { LineIcon } from "@/components/illustrations/Icons";
+import { Graphic } from "@/components/illustrations/Graphic";
 import { Container } from "@/components/layout/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { SectionIntro } from "@/components/ui/SectionIntro";
@@ -37,11 +36,7 @@ export function BeyondTraining({ eyebrow, heading, lede, items }: Props) {
                 <span className="font-label text-xs font-semibold tracking-[0.18em] text-grey-500">
                   0{i + 1}
                 </span>
-                {item.icon && (
-                  <Draw className="hidden shrink-0 text-ink sm:block">
-                    <LineIcon name={item.icon} className="size-14" />
-                  </Draw>
-                )}
+                <Graphic value={item.icon} kind="icon" className="hidden shrink-0 sm:block" sizeClassName="size-14" />
                 <span className="flex-1">
                   <span className="block font-serif text-3xl tracking-tight sm:text-4xl">
                     {item.title}

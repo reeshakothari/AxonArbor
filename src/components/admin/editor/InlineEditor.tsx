@@ -10,6 +10,7 @@ import { EditingContext } from "@/components/editing-context";
 import { SiteChrome } from "@/views/SiteChrome";
 import { MediaLibrary } from "../MediaLibrary";
 import { ACCEPT_ATTR, uploadImage, type MediaItem } from "../media";
+import { GraphicPicker } from "./GraphicPicker";
 import { AdminButton, ConfirmDialog, Toast } from "../ui";
 import { encodeDocs, sourceOfImg } from "./encode";
 import { DocumentForm } from "./FieldForm";
@@ -19,7 +20,8 @@ import { getAt, isRecord, nearestList, setAt, type FieldRef, type Path } from ".
 
 type Target =
   | { kind: "text"; ref: FieldRef; anchor: Text | Element }
-  | { kind: "image"; ref: FieldRef; anchor: Element };
+  | { kind: "image"; ref: FieldRef; anchor: Element }
+  | { kind: "graphic"; ref: FieldRef; anchor: Element };
 
 type SaveState = "saved" | "saving" | "unsaved" | "error";
 
@@ -98,7 +100,10 @@ export function InlineEditor({
   const [preview, setPreview] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelDoc, setPanelDoc] = useState<ContentKey>(page.docs[0]);
-  const [imageModal, setImageModal] = useState<FieldRef | null>(null);
+  const [imageModal, setImageModal] = useState<(FieldRef & { mode: "image" | "graphic" }) | null>(null);
+  const [graphicModal, setGraphicModal] = useState<FieldRef | null>(null);
+  const [showEditable, setShowEditable] = useState(true);
+  const [outlines, setOutlines] = useState<DOMRect[]>([]);
   const [dialog, setDialog] = useState<"publish" | "discard" | null>(null);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ message: string; tone: "info" | "error" } | null>(null);
@@ -191,6 +196,13 @@ export function InlineEditor({
       const canvas = canvasRef.current;
       if (!canvas || !element || !canvas.contains(element)) return null;
 
+      // Drawings and icons carry their field's marker in data-edit.
+      const graphic = element.closest("[data-edit]");
+      if (graphic && canvas.contains(graphic)) {
+        const [id] = decodeIds(graphic.getAttribute("data-edit") ?? "");
+        if (id !== undefined && encoded.fields[id]) return { kind: "graphic", ref: encoded.fields[id], anchor: graphic };
+      }
+
       const img = element.closest("img");
       if (img && canvas.contains(img)) {
         const src = sourceOfImg(img);
@@ -228,7 +240,12 @@ export function InlineEditor({
     const found = locate(e.clientX, e.clientY, e.target as Element);
     if (!found) return setHover(null);
     const rect = rectOf(found.anchor);
-    const label = found.kind === "image" ? "Image: click to replace" : describePath(found.ref.path);
+    const label =
+      found.kind === "image"
+        ? "Image: click to replace"
+        : found.kind === "graphic"
+          ? "Drawing: click to change"
+          : describePath(found.ref.path);
     setHover({ rect, label });
   }
 
@@ -270,6 +287,7 @@ export function InlineEditor({
     return () => cancelAnimationFrame(frame);
   }, [target]);
   const targetRect = tracked && tracked.target === target ? tracked.rect : null;
+  const graphicRef: FieldRef | null = target?.kind === "graphic" ? target.ref : graphicModal;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -313,11 +331,56 @@ export function InlineEditor({
 
   /* ----- images ----- */
 
-  async function applyImage(ref: FieldRef, item: MediaItem) {
-    const current = getAt(docs[ref.doc], ref.path) as Record<string, unknown>;
-    update(ref.doc, ref.path, { ...current, src: item.src, width: item.width, height: item.height });
+  async function applyImage(ref: FieldRef & { mode?: "image" | "graphic" }, item: MediaItem) {
+    if (ref.mode === "graphic") {
+      update(ref.doc, ref.path, item.src);
+    } else {
+      const current = getAt(docs[ref.doc], ref.path) as Record<string, unknown>;
+      update(ref.doc, ref.path, { ...current, src: item.src, width: item.width, height: item.height });
+    }
     setImageModal(null);
   }
+
+  /* ----- always-visible outlines around everything editable ----- */
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      if (!showEditable || preview) return setOutlines([]);
+      const rects: DOMRect[] = [];
+      const vh = window.innerHeight;
+      const keep = (r: DOMRect) => {
+        if (r.width > 1 && r.height > 1 && r.bottom > 0 && r.top < vh) rects.push(r);
+      };
+      const walker = document.createTreeWalker(canvas, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const text = node as Text;
+        if (!hasMarker(text.data) || text.parentElement?.closest(".sr-only, [data-edit]")) continue;
+        const range = document.createRange();
+        range.selectNodeContents(text);
+        keep(range.getBoundingClientRect());
+      }
+      canvas.querySelectorAll("[data-edit], img").forEach((el) => keep(el.getBoundingClientRect()));
+      setOutlines(rects);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    const observer = new MutationObserver(schedule);
+    observer.observe(canvas, { subtree: true, childList: true, characterData: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      observer.disconnect();
+    };
+  }, [showEditable, preview, docs]);
 
   const changedTitles = contentPages.filter((p) => unpublished.has(p.key)).map((p) => p.title);
   const statusText = {
@@ -386,10 +449,44 @@ export function InlineEditor({
               flash((e as Error).message, "error");
             }
           }}
-          onLibrary={() => setImageModal(target.ref)}
+          onLibrary={() => setImageModal({ ...target.ref, mode: "image" })}
           onClose={() => setTarget(null)}
         />
       )}
+
+      {/* Drawing / icon picker, from a click on the page or from the settings panel */}
+      {graphicRef && (
+        <GraphicPicker
+          rect={target?.kind === "graphic" ? targetRect : null}
+          fieldKey={String(graphicRef.path[graphicRef.path.length - 1])}
+          value={String(getAt(docs[graphicRef.doc], graphicRef.path) ?? "")}
+          onChange={(value) => update(graphicRef.doc, graphicRef.path, value)}
+          onUpload={async (file) => {
+            try {
+              const item = await uploadImage(file);
+              update(graphicRef.doc, graphicRef.path, item.src);
+              flash("Image uploaded.");
+            } catch (e) {
+              flash((e as Error).message, "error");
+            }
+          }}
+          onLibrary={() => setImageModal({ ...graphicRef, mode: "graphic" })}
+          onClose={() => {
+            setTarget(null);
+            setGraphicModal(null);
+          }}
+        />
+      )}
+
+      {/* Dotted outlines so editable things are visible without hovering */}
+      {outlines.map((r, i) => (
+        <div
+          key={i}
+          aria-hidden="true"
+          className="pointer-events-none fixed z-[55] outline-1 outline-offset-2 outline-amber/70 outline-dotted"
+          style={{ left: r.left, top: r.top, width: r.width, height: r.height }}
+        />
+      ))}
 
       {imageModal && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-ink/40 p-4" onClick={() => setImageModal(null)}>
@@ -441,7 +538,8 @@ export function InlineEditor({
               ctx={{
                 root: docs[panelDoc],
                 onChange: (path, value) => update(panelDoc, path, value),
-                onEditImage: (path) => setImageModal({ doc: panelDoc, path }),
+                onEditImage: (path) => setImageModal({ doc: panelDoc, path, mode: "image" }),
+                onEditGraphic: (path) => setGraphicModal({ doc: panelDoc, path }),
               }}
             />
           </div>
@@ -464,7 +562,7 @@ export function InlineEditor({
       )}
 
       {/* Editor toolbar */}
-      <div className="fixed bottom-4 left-1/2 z-[75] flex w-[min(60rem,calc(100vw-1rem))] -translate-x-1/2 flex-wrap items-center gap-2 border border-grey-800 bg-ink px-3 py-2 font-sans text-paper shadow-2xl">
+      <div className="fixed bottom-4 left-1/2 z-[75] flex w-[min(68rem,calc(100vw-1rem))] -translate-x-1/2 flex-wrap items-center gap-1.5 border border-grey-800 bg-ink px-3 py-2 font-sans text-paper shadow-2xl">
         <a href="/admin" className="px-2 py-1.5 text-sm text-grey-300 hover:text-amber" title="Back to dashboard">
           ← Dashboard
         </a>
@@ -489,6 +587,15 @@ export function InlineEditor({
           className={`px-3 py-1.5 text-sm ${panelOpen ? "bg-paper text-ink" : "text-grey-200 hover:text-amber"}`}
         >
           All settings
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowEditable((v) => !v)}
+          aria-pressed={showEditable}
+          className={`px-3 py-1.5 text-sm ${showEditable ? "text-amber" : "text-grey-200 hover:text-amber"}`}
+          title="Outline everything you can click to edit"
+        >
+          Outlines
         </button>
         <button
           type="button"
@@ -584,7 +691,10 @@ function TextPopover({
   const key = refField.path[refField.path.length - 1];
   const parentPath = refField.path.slice(0, -1);
   const parent = getAt(root, parentPath);
-  const hasLink = key === "label" && isRecord(parent) && typeof parent.href === "string";
+  const hasLink = isRecord(parent) && typeof parent.href === "string";
+  const hasTone = isRecord(parent) && "tone" in parent && refField.path.includes("parts");
+  const vendorNames = refField.doc === "home" ? ((getAt(root, ["problem", "vendors"]) as string[] | undefined) ?? []) : [];
+  const highlights = isRecord(parent) && Array.isArray(parent.vendors) ? (parent.vendors as number[]) : null;
   const list = nearestList(root, refField.path);
   const listItems = list ? (getAt(root, list.listPath) as unknown[]) : null;
 
@@ -595,7 +705,7 @@ function TextPopover({
     el.setSelectionRange(el.value.length, el.value.length);
   }, []);
 
-  const pos = place(rect, 420, hasLink ? 300 : 240);
+  const pos = place(rect, 420, 240 + (hasLink ? 60 : 0) + (hasTone ? 60 : 0) + (highlights ? 110 : 0));
 
   function listAction(kind: "add" | "remove" | "up" | "down") {
     if (!list || !listItems) return;
@@ -657,6 +767,46 @@ function TextPopover({
             ))}
           </datalist>
         </label>
+      )}
+      {hasTone && (
+        <label className="mt-3 block text-xs font-medium text-grey-700">
+          Style
+          <select
+            value={String((parent as { tone?: string }).tone ?? "")}
+            onChange={(e) => onChange([...parentPath, "tone"], e.target.value)}
+            className="mt-1 block w-full border border-grey-300 px-3 py-2 text-sm focus:border-ink focus:outline-none"
+          >
+            <option value="">Normal</option>
+            <option value="heavy">Heavy (bold, sinks)</option>
+            <option value="light">Light (italic, lifts)</option>
+          </select>
+        </label>
+      )}
+      {highlights && vendorNames.length > 0 && (
+        <fieldset className="mt-3">
+          <legend className="text-xs font-medium text-grey-700">Vendors this pain point lights up</legend>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {vendorNames.map((name, i) => {
+              const on = highlights.includes(i);
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() =>
+                    onChange(
+                      [...parentPath, "vendors"],
+                      on ? highlights.filter((v) => v !== i) : [...highlights, i].sort((a, b) => a - b),
+                    )
+                  }
+                  className={`border px-2 py-1 text-xs ${on ? "border-ink bg-ink text-paper" : "border-grey-300"}`}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
       )}
       {list && listItems && (
         <div className="mt-3 flex flex-wrap items-center gap-1 border-t border-grey-100 pt-3 text-xs">

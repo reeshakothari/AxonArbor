@@ -271,6 +271,17 @@
   animation: none !important;
 }
 
+/* Drawings appear fully drawn while editing. */
+.editing .draw [data-stroke] {
+  stroke-dashoffset: 0 !important;
+  transition: none !important;
+}
+
+.editing .draw [data-node] {
+  transform: none !important;
+  transition: none !important;
+}
+
 .editing .ticker-track {
   animation: none !important;
   display: block;

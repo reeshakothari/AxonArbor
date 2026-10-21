@@ -1,10 +1,9 @@
-import { Arbor } from "@/components/illustrations/Arbor";
-import { Draw } from "@/components/illustrations/Draw";
+import { Graphic } from "@/components/illustrations/Graphic";
 import { Container } from "@/components/layout/Container";
 import { ButtonLink } from "@/components/ui/Button";
 import type { HeroContent } from "@/content/types";
 
-export function Hero({ eyebrow, heading, lede, primaryCta, secondaryCta }: HeroContent) {
+export function Hero({ illustration, eyebrow, heading, lede, primaryCta, secondaryCta }: HeroContent) {
   return (
     <section
       aria-labelledby="hero-heading"
@@ -31,9 +30,13 @@ export function Hero({ eyebrow, heading, lede, primaryCta, secondaryCta }: HeroC
         </h1>
 
         <div className="flex flex-col justify-end lg:col-span-4 lg:pb-3">
-          <Draw threshold={0.1} className="mb-6 hidden text-ink lg:block">
-            <Arbor className="h-[clamp(100px,18svh,190px)] w-auto" />
-          </Draw>
+          <Graphic
+            value={illustration}
+            kind="illustration"
+            drawThreshold={0.1}
+            className="mb-6 hidden lg:block"
+            sizeClassName="h-[clamp(100px,18svh,190px)] w-auto"
+          />
           <p aria-hidden="true" className="font-serif text-2xl leading-snug text-balance sm:text-3xl">
             {heading}
           </p>

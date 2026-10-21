@@ -74,6 +74,8 @@ const LABELS: Record<string, string> = {
   tagline: "Tagline",
   copyright: "Copyright line",
   alt: "Image description (for screen readers and Google)",
+  icon: "Drawing",
+  illustration: "Drawing",
 };
 
 /** Names for the top-level sections of a page, where the generic label is ambiguous. */
@@ -115,7 +117,7 @@ export function isLongText(key: string | number, value: string) {
 }
 
 /** Keys that hold technical values (links, file paths, ids), never shown as page text. */
-export const NON_DISPLAY_KEYS = new Set(["href", "src", "icon", "tone", "id", "path", "phoneHref", "alt", "width", "height"]);
+export const NON_DISPLAY_KEYS = new Set(["href", "src", "tone", "id", "path", "phoneHref", "alt", "width", "height"]);
 
 /** Keys the admin never needs to see. */
 export const HIDDEN_KEYS = new Set(["width", "height", "path", "id"]);

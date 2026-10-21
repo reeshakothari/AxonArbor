@@ -6,7 +6,6 @@ import type { IconName } from "@/content/types";
 import { HIDDEN_KEYS, humanise, isLongText, sectionLabel } from "./labels";
 import { getAt, isRecord, type Path } from "./paths";
 
-const ICONS: IconName[] = ["one-stop", "tailored", "experts", "inclusion", "speaker", "coaching"];
 const ICON_LABELS: Record<IconName, string> = {
   "one-stop": "Converging lines (one stop shop)",
   tailored: "Shaped paths (tailored)",
@@ -20,6 +19,7 @@ type Ctx = {
   root: unknown;
   onChange: (path: Path, value: unknown) => void;
   onEditImage: (path: Path) => void;
+  onEditGraphic: (path: Path) => void;
 };
 
 const inputClass =
@@ -201,19 +201,27 @@ export function Field({
     );
   }
 
-  if (key === "icon") {
+  if (key === "icon" || key === "illustration") {
+    const current = String(value ?? "");
+    const description = !current
+      ? "None"
+      : current.startsWith("/") || current.startsWith("http")
+        ? "Your uploaded image"
+        : (ICON_LABELS[current as IconName] ?? (current === "arbor" ? "Tree drawing" : current));
     return (
-      <label className="block text-xs font-medium text-grey-700">
-        Drawing
-        <select id={id} value={String(value ?? "")} onChange={(e) => ctx.onChange(path, e.target.value || undefined)} className={inputClass}>
-          <option value="">None</option>
-          {ICONS.map((icon) => (
-            <option key={icon} value={icon}>
-              {ICON_LABELS[icon]}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div>
+        <p className="text-xs font-medium text-grey-700">Drawing</p>
+        <div className="mt-1.5 flex items-center gap-3">
+          <span className="text-sm text-grey-600">{description}</span>
+          <button
+            type="button"
+            onClick={() => ctx.onEditGraphic(path)}
+            className="border border-grey-300 px-3 py-2 text-xs hover:border-ink"
+          >
+            Change
+          </button>
+        </div>
+      </div>
     );
   }
 

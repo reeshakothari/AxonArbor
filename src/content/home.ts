@@ -9,6 +9,7 @@ export const home: HomeContent = {
   },
 
   hero: {
+    illustration: "arbor",
     eyebrow: ["Learning", "Leadership", "Belonging"],
     heading: "The Learning & Development partner that works for you.",
     lede: "Axon Arbor is a Learning & Development solutions company. We design, deliver and integrate every part of capability building, so learning becomes a business advantage rather than a reactive function.",

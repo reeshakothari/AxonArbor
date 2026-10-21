@@ -15,8 +15,11 @@ const END = char(0x2063); // invisible separator
 const DIGITS = [0x200b, 0x200c, 0x200d, 0x2060].map(char); // base-4 digits
 
 const digitClass = `[${DIGITS.join("")}]`;
-const MARKER_RE = new RegExp(`${START}(${digitClass}+)${END}`, "g");
-const ANY_MARKER_CHAR_RE = new RegExp(`[${DIGITS.join("")}${START}${END}]`, "g");
+const MARKER_SOURCE = `${START}(${digitClass}+)${END}`;
+// Fresh RegExp objects per call: shared global regexes keep lastIndex between
+// calls, which made one lookup silently skip the marker in the next string.
+const markerRe = () => new RegExp(MARKER_SOURCE, "g");
+const ANY_MARKER_CHAR = `[${DIGITS.join("")}${START}${END}]`;
 
 export function encodeId(id: number): string {
   let digits = "";
@@ -36,16 +39,15 @@ function decodeDigits(digits: string): number {
 
 /** Ids of all markers in a string, in order. */
 export function decodeIds(text: string): number[] {
-  return Array.from(text.matchAll(MARKER_RE), (m) => decodeDigits(m[1]));
+  return Array.from(text.matchAll(markerRe()), (m) => decodeDigits(m[1]));
 }
 
 export function stripMarkers(text: string): string {
-  return text.replace(ANY_MARKER_CHAR_RE, "");
+  return text.replace(new RegExp(ANY_MARKER_CHAR, "g"), "");
 }
 
 export function hasMarker(text: string): boolean {
-  MARKER_RE.lastIndex = 0;
-  return MARKER_RE.test(text);
+  return new RegExp(MARKER_SOURCE).test(text);
 }
 
 /** Visible length of a string that may carry markers. */
@@ -58,7 +60,7 @@ export function visibleLength(text: string): number {
  * the marker (if any) is copied onto every piece.
  */
 export function splitWords(text: string): string[] {
-  const markers = text.match(MARKER_RE)?.join("") ?? "";
+  const markers = text.match(markerRe())?.join("") ?? "";
   return stripMarkers(text)
     .split(/\s+/)
     .filter(Boolean)

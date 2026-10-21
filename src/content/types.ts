@@ -33,7 +33,8 @@ export type IconName = "one-stop" | "tailored" | "experts" | "inclusion" | "spea
 export type Item = {
   title: string;
   body: string;
-  icon?: IconName;
+  /** A built-in drawing (IconName), an uploaded image URL, or empty for none. */
+  icon?: string;
 };
 
 export type LinkedItem = Item & { href?: string };
@@ -54,6 +55,8 @@ export type CapabilityColumn = {
 };
 
 export type HeroContent = {
+  /** "arbor" for the built-in tree drawing, an uploaded image URL, or empty for none. */
+  illustration: string;
   eyebrow: string[];
   heading: string;
   lede: string;
