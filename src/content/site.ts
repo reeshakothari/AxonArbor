@@ -36,6 +36,10 @@ export const site: SiteContent = {
     contactHeading: "Get in touch",
     location: "Noida, India",
     copyright: "© Axon Arbor Consulting",
+    legalLinks: [
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Use", href: "/terms" },
+    ],
   },
   notFound: {
     eyebrow: "Page not found",

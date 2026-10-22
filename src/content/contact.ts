@@ -28,6 +28,8 @@ export const contact: ContactContent = {
     successBody: "Someone from the Axon Arbor team will be in touch shortly.",
     sendAnotherLabel: "Send another message",
     errorMessage: "Sorry, something went wrong. Please try again, or email us directly.",
+    privacyNote: "We’ll use your details only to reply to your enquiry. See our",
+    privacyLinkLabel: "Privacy Policy",
   },
   details: {
     visitHeading: "Visit",

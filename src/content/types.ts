@@ -184,12 +184,29 @@ export type ContactContent = {
     successBody: string;
     sendAnotherLabel: string;
     errorMessage: string;
+    privacyNote: string;
+    privacyLinkLabel: string;
   };
   details: {
     visitHeading: string;
     emailHeading: string;
     callHeading: string;
   };
+};
+
+export type LegalSection = {
+  heading: string;
+  paragraphs: string[];
+  points: string[];
+};
+
+export type LegalContent = {
+  meta: PageMeta;
+  header: PageHeaderContent;
+  /** e.g. "22 October 2026" */
+  updated: string;
+  intro: string[];
+  sections: LegalSection[];
 };
 
 export type SignInContent = {
@@ -220,6 +237,7 @@ export type SiteContent = {
     contactHeading: string;
     location: string;
     copyright: string;
+    legalLinks: Link[];
   };
   notFound: {
     eyebrow: string;

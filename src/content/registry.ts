@@ -1,6 +1,7 @@
 import { about } from "./about";
 import { contact, signIn } from "./contact";
 import { home } from "./home";
+import { privacy, terms } from "./legal";
 import { hospitality } from "./hospitality";
 import { programmes } from "./programmes";
 import { site } from "./site";
@@ -9,6 +10,7 @@ import type {
   ContactContent,
   HomeContent,
   HospitalityContent,
+  LegalContent,
   ProgrammesContent,
   SignInContent,
   SiteContent,
@@ -23,6 +25,8 @@ export type ContentMap = {
   about: AboutContent;
   contact: ContactContent;
   "sign-in": SignInContent;
+  privacy: LegalContent;
+  terms: LegalContent;
 };
 
 export type ContentKey = keyof ContentMap;
@@ -36,6 +40,8 @@ export const contentDefaults: ContentMap = {
   about,
   contact,
   "sign-in": signIn,
+  privacy,
+  terms,
 };
 
 /** How each document appears in the admin dashboard, in sidebar order. */
@@ -57,6 +63,8 @@ export const contentPages: {
   { key: "about", title: "About Us", description: "Founder, advisors, facilitators and partners.", path: "/about" },
   { key: "contact", title: "Contact Us", description: "Form labels, messages and contact panel.", path: "/contact" },
   { key: "sign-in", title: "Sign-in page", description: "The sign-in page for consultants and companies.", path: "/sign-in" },
+  { key: "privacy", title: "Privacy Policy", description: "What data the site collects and how it is used.", path: "/privacy" },
+  { key: "terms", title: "Terms of Use", description: "The rules for using the website and accounts.", path: "/terms" },
 ];
 
 export function isContentKey(value: string): value is ContentKey {

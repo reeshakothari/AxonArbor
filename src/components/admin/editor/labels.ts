@@ -3,6 +3,12 @@ import type { Path } from "./paths";
 /** Plain-English names for content fields, shown to admins. */
 const LABELS: Record<string, string> = {
   meta: "Search engines & sharing",
+  updated: "Last updated (date)",
+  sections: "Sections",
+  points: "Bullet points",
+  legalLinks: "Legal links (bottom of footer)",
+  privacyNote: "Privacy note under the form",
+  privacyLinkLabel: "Privacy link text",
   title: "Title",
   description: "Description",
   eyebrow: "Small label above the heading",

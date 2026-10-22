@@ -25,10 +25,19 @@ export function SignInForm({ submitLabel = "Sign in" }: { submitLabel?: string }
   );
 }
 
+const legalLink = "text-ink underline decoration-amber decoration-2 underline-offset-4";
+
 const terms = (
   <>
-    I agree that Axon Arbor may store these details and use them to manage my account. Profiles are shared with client companies only as
-    described on this site.
+    I agree to the{" "}
+    <Link href="/terms" target="_blank" className={legalLink}>
+      Terms of Use
+    </Link>{" "}
+    and{" "}
+    <Link href="/privacy" target="_blank" className={legalLink}>
+      Privacy Policy
+    </Link>
+    , and confirm I’m 18 or over.
   </>
 );
 

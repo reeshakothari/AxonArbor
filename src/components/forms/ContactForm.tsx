@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import type { ContactContent } from "@/content/types";
@@ -24,6 +25,8 @@ export function ContactForm({
   successBody,
   sendAnotherLabel,
   errorMessage,
+  privacyNote,
+  privacyLinkLabel,
 }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
@@ -161,6 +164,13 @@ export function ContactForm({
           {status === "error" && errorMessage}
         </p>
       </div>
+      <p className="mt-6 text-sm text-grey-600">
+        {privacyNote}{" "}
+        <Link href="/privacy" className="text-ink underline decoration-amber decoration-2 underline-offset-4">
+          {privacyLinkLabel}
+        </Link>
+        .
+      </p>
     </form>
   );
 }

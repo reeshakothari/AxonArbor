@@ -60,7 +60,14 @@ export function Footer({ site }: { site: SiteContent }) {
       <div className="border-t border-grey-800">
         <Container className="flex flex-col gap-2 py-6 text-xs text-grey-400 sm:flex-row sm:justify-between">
           <p>{footer.copyright}</p>
-          <p>{footer.location}</p>
+          <nav aria-label="Legal" className="flex flex-wrap gap-x-6 gap-y-2">
+            {footer.legalLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="transition-colors hover:text-amber">
+                {link.label}
+              </Link>
+            ))}
+            <span>{footer.location}</span>
+          </nav>
         </Container>
       </div>
     </footer>

@@ -3,6 +3,7 @@ import { AboutView } from "@/views/AboutView";
 import { ContactView } from "@/views/ContactView";
 import { HomeView } from "@/views/HomeView";
 import { HospitalityView } from "@/views/HospitalityView";
+import { LegalView } from "@/views/LegalView";
 import { NotFoundView } from "@/views/NotFoundView";
 import { ProgrammesView } from "@/views/ProgrammesView";
 import { SignInView } from "@/views/SignInView";
@@ -23,6 +24,8 @@ export const EDITABLE_PAGES: EditablePage[] = [
   { id: "about", title: "About Us", path: "/about", docs: ["about", "site"] },
   { id: "contact", title: "Contact Us", path: "/contact", docs: ["contact", "site"] },
   { id: "sign-in", title: "Sign-in page", path: "/sign-in", docs: ["sign-in", "site"] },
+  { id: "privacy", title: "Privacy Policy", path: "/privacy", docs: ["privacy", "site"] },
+  { id: "terms", title: "Terms of Use", path: "/terms", docs: ["terms", "site"] },
   { id: "not-found", title: "404 page", path: null, docs: ["site"] },
 ];
 
@@ -49,6 +52,10 @@ export function renderPage(id: string, d: ContentMap) {
       return <ContactView contact={d.contact} site={d.site} />;
     case "sign-in":
       return <SignInView signIn={d["sign-in"]} site={d.site} />;
+    case "privacy":
+      return <LegalView legal={d.privacy} />;
+    case "terms":
+      return <LegalView legal={d.terms} />;
     default:
       return <NotFoundView site={d.site} />;
   }

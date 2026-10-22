@@ -144,7 +144,16 @@ export function ConsultantProfileForm({ profile }: { profile: ConsultantProfile 
           name="consent"
           defaultChecked={profile.consent}
           error={fe.consent}
-          label="I agree that Axon Arbor may show my profile to client companies. Before an introduction, companies see it without my name, photo, LinkedIn or contact details."
+          label={
+          <>
+            I agree that Axon Arbor may show my profile to verified client companies. Before an introduction, companies see it without my
+            name, photo, LinkedIn or contact details, and never see my day rate. I can withdraw this at any time. See the{" "}
+            <a href="/privacy" target="_blank" className="text-ink underline decoration-amber decoration-2 underline-offset-4">
+              Privacy Policy
+            </a>
+            .
+          </>
+        }
         />
 
         <FormMessage error={state.error} ok={state.ok} />
