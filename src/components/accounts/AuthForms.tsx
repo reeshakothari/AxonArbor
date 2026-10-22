@@ -19,17 +19,6 @@ export function SignInForm({ submitLabel = "Sign in" }: { submitLabel?: string }
       <Button type="submit" arrow disabled={pending}>
         {pending ? "Signing in…" : submitLabel}
       </Button>
-      <p className="text-sm text-grey-600">
-        New here?{" "}
-        <Link href="/join/consultant" className="text-ink underline decoration-amber decoration-2 underline-offset-4">
-          Join as a consultant
-        </Link>{" "}
-        or{" "}
-        <Link href="/join/company" className="text-ink underline decoration-amber decoration-2 underline-offset-4">
-          register your company
-        </Link>
-        .
-      </p>
     </form>
   );
 }
@@ -63,7 +52,7 @@ export function ConsultantSignUpForm() {
       <Button type="submit" arrow disabled={pending}>
         {pending ? "Creating account…" : "Create my account"}
       </Button>
-      <p className="text-sm text-grey-600">
+      <p className="text-base text-grey-600">
         Already have an account?{" "}
         <Link href="/sign-in" className="text-ink underline decoration-amber decoration-2 underline-offset-4">
           Sign in
@@ -119,7 +108,7 @@ export function CompanySignUpForm() {
         <Button type="submit" arrow disabled={pending}>
           {pending ? "Creating account…" : "Register my company"}
         </Button>
-        <p className="text-sm text-grey-600">We review every company before access is granted, usually within one working day.</p>
+        <p className="text-base text-grey-600">We review every company before access is granted, usually within one working day.</p>
       </div>
     </form>
   );

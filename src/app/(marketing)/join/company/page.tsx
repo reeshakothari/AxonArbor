@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CompanySignUpForm } from "@/components/accounts/AuthForms";
-import { Container } from "@/components/layout/Container";
+import { BenefitsBand, COMPANY_BENEFITS, COMPANY_STEPS, FormWithSteps } from "@/components/accounts/Pitch";
 import { PageHeader } from "@/components/sections/PageHeader";
 
 export const metadata: Metadata = {
   title: "Register your company",
-  description: "Register your organisation with Axon Arbor using your work email.",
+  description: "Register your organisation with Axon Arbor and get shortlists of reviewed consultants matched to your needs.",
   alternates: { canonical: "/join/company" },
 };
 
@@ -15,21 +15,20 @@ export default function Page() {
     <>
       <PageHeader
         eyebrow="For companies"
-        heading="Register your organisation."
-        lede="Sign up with your work email. We check every company before granting access, so consultants’ profiles stay with genuine organisations."
+        heading="The right expert, without the search."
+        lede="Register your organisation to reach Axon Arbor’s reviewed network of consultants, matched to what your people need."
       />
-      <Container className="py-16 sm:py-20">
-        <div className="max-w-3xl">
-          <CompanySignUpForm />
-          <p className="mt-10 text-sm text-grey-600">
-            Already registered?{" "}
-            <Link href="/sign-in" className="text-ink underline decoration-amber decoration-2 underline-offset-4">
-              Sign in
-            </Link>
-            .
-          </p>
-        </div>
-      </Container>
+      <BenefitsBand eyebrow="Why Axon Arbor" heading="Less searching. Better matches." points={COMPANY_BENEFITS} />
+      <FormWithSteps title="Register your organisation" steps={COMPANY_STEPS}>
+        <CompanySignUpForm />
+        <p className="mt-10 text-base text-grey-600">
+          Already registered?{" "}
+          <Link href="/sign-in" className="text-ink underline decoration-amber decoration-2 underline-offset-4">
+            Sign in
+          </Link>
+          .
+        </p>
+      </FormWithSteps>
     </>
   );
 }

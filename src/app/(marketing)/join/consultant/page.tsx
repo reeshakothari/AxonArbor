@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { ConsultantSignUpForm } from "@/components/accounts/AuthForms";
-import { Container } from "@/components/layout/Container";
+import { BenefitsBand, CONSULTANT_BENEFITS, CONSULTANT_STEPS, ExpertiseTicker, FormWithSteps } from "@/components/accounts/Pitch";
 import { PageHeader } from "@/components/sections/PageHeader";
 
 export const metadata: Metadata = {
   title: "Join as a consultant",
-  description: "Create your Axon Arbor consultant account and build your profile.",
+  description: "Join the Axon Arbor consultant network and be matched to vetted organisations looking for your expertise.",
   alternates: { canonical: "/join/consultant" },
 };
 
@@ -14,12 +14,14 @@ export default function Page() {
     <>
       <PageHeader
         eyebrow="For consultants"
-        heading="Join the Axon Arbor network."
-        lede="Create your account, then complete your profile. Our team reviews every profile before companies can see it."
+        heading="Your expertise, in front of the right organisations."
+        lede="Join the Axon Arbor network of trainers, coaches and facilitators, and be matched to companies that need exactly what you do."
       />
-      <Container className="py-16 sm:py-20">
+      <ExpertiseTicker />
+      <BenefitsBand eyebrow="Why join" heading="Built for independent experts." points={CONSULTANT_BENEFITS} />
+      <FormWithSteps title="Create your account" steps={CONSULTANT_STEPS}>
         <ConsultantSignUpForm />
-      </Container>
+      </FormWithSteps>
     </>
   );
 }
