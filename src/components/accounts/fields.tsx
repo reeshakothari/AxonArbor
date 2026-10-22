@@ -1,6 +1,30 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { createContext, startTransition, useContext, type FormEvent, type ReactNode } from "react";
+
+/**
+ * Submits through the action without React's automatic form reset, so a
+ * validation error never wipes what the person typed (passwords included).
+ */
+export function submitWithoutReset(action: (form: FormData) => void) {
+  return (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget, (e.nativeEvent as SubmitEvent).submitter);
+    startTransition(() => action(form));
+  };
+}
+
+/** Values sent back by the last submit; when present they replace each field's default. */
+const SubmittedValues = createContext<Record<string, string> | undefined>(undefined);
+
+export function KeepValues({ values, children }: { values?: Record<string, string>; children: ReactNode }) {
+  return <SubmittedValues.Provider value={values}>{children}</SubmittedValues.Provider>;
+}
+
+function useSubmitted(name: string, fallback: string | number | null | undefined) {
+  const values = useContext(SubmittedValues);
+  return values ? (values[name] ?? "") : (fallback ?? "");
+}
 
 const control =
   "mt-2 block w-full rounded-none border-0 border-b bg-transparent px-0 py-3 text-base text-ink placeholder:text-grey-400 focus:border-ink focus:outline-none focus-visible:border-b-2";
@@ -49,11 +73,12 @@ export function TextField({
   multiline?: boolean;
   rows?: number;
 }) {
+  const value = useSubmitted(base.name, defaultValue);
   const props = {
     id: `f-${base.name}`,
     name: base.name,
     required: base.required,
-    defaultValue: defaultValue ?? "",
+    defaultValue: value,
     autoComplete,
     maxLength,
     "aria-invalid": base.error ? true : undefined,
@@ -71,13 +96,14 @@ export function SelectField({
   placeholder = "Choose…",
   ...base
 }: Base & { options: readonly string[]; defaultValue?: string | null; placeholder?: string }) {
+  const value = useSubmitted(base.name, defaultValue);
   return (
     <Wrap {...base}>
       <select
         id={`f-${base.name}`}
         name={base.name}
         required={base.required}
-        defaultValue={defaultValue ?? ""}
+        defaultValue={value}
         aria-invalid={base.error ? true : undefined}
         aria-describedby={describedBy(base.name, base.error, base.hint)}
         className={`${control} ${base.error ? "border-b-2 border-ink" : "border-grey-300"}`}
@@ -104,13 +130,15 @@ export function CheckboxField({
   defaultChecked?: boolean;
   error?: string;
 }) {
+  const values = useContext(SubmittedValues);
+  const checked = values ? values[name] === "on" : defaultChecked;
   return (
     <div>
       <label className="flex items-start gap-3 text-sm leading-relaxed text-grey-700">
         <input
           type="checkbox"
           name={name}
-          defaultChecked={defaultChecked}
+          defaultChecked={checked}
           aria-invalid={error ? true : undefined}
           className="mt-1 size-4 shrink-0 accent-black"
         />

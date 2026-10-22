@@ -15,7 +15,7 @@ import type { CompanyProfile, ConsultantProfile } from "@/lib/accounts/data";
 import { CITIES, DAY_RATE_BANDS, DELIVERY_MODES, EMPLOYEE_BANDS, EXPERTISE } from "@/lib/phase2/options";
 import { MEDIA_BUCKET } from "@/lib/supabase/config";
 import { createPublicClient } from "@/lib/supabase/public";
-import { CheckboxField, FormMessage, SelectField, TextField } from "./fields";
+import { CheckboxField, FormMessage, KeepValues, submitWithoutReset, SelectField, TextField } from "./fields";
 
 const initial: FormState = { error: null };
 
@@ -74,88 +74,90 @@ export function ConsultantProfileForm({ profile }: { profile: ConsultantProfile 
   const fe = state.fieldErrors ?? {};
   const [ex1, ex2, ex3] = profile.expertise;
   return (
-    <form action={action} noValidate className="space-y-12">
-      <fieldset className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
-        <legend className="mb-6 font-serif text-2xl">About you</legend>
-        <TextField name="full_name" label="Full name" required defaultValue={profile.full_name} error={fe.full_name} />
-        <TextField name="phone" label="Mobile number" type="tel" required defaultValue={profile.phone} error={fe.phone} hint="Include the country code." />
-        <SelectField name="city" label="City / base location" required options={CITIES} defaultValue={profile.city} error={fe.city} />
-        <TextField
-          name="years_experience"
-          label="Years of experience"
-          type="number"
-          required
-          defaultValue={profile.years_experience}
-          error={fe.years_experience}
+    <KeepValues values={state.values}>
+      <form action={action} onSubmit={submitWithoutReset(action)} noValidate className="space-y-12">
+        <fieldset className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
+          <legend className="mb-6 font-serif text-2xl">About you</legend>
+          <TextField name="full_name" label="Full name" required defaultValue={profile.full_name} error={fe.full_name} />
+          <TextField name="phone" label="Mobile number" type="tel" required defaultValue={profile.phone} error={fe.phone} hint="Include the country code." />
+          <SelectField name="city" label="City / base location" required options={CITIES} defaultValue={profile.city} error={fe.city} />
+          <TextField
+            name="years_experience"
+            label="Years of experience"
+            type="number"
+            required
+            defaultValue={profile.years_experience}
+            error={fe.years_experience}
+          />
+          <div className="sm:col-span-2">
+            <PhotoField initialUrl={profile.photo_url} />
+          </div>
+        </fieldset>
+
+        <fieldset className="grid gap-x-8 gap-y-7 sm:grid-cols-3">
+          <legend className="mb-6 font-serif text-2xl">Expertise</legend>
+          <SelectField name="expertise_1" label="Main expertise" required options={EXPERTISE} defaultValue={ex1} error={fe.expertise_1} />
+          <SelectField name="expertise_2" label="Expertise 2" options={EXPERTISE} defaultValue={ex2} placeholder="(optional)" />
+          <SelectField name="expertise_3" label="Expertise 3" options={EXPERTISE} defaultValue={ex3} placeholder="(optional)" />
+          <TextField
+            name="industries"
+            label="Industries worked with"
+            required
+            defaultValue={profile.industries}
+            error={fe.industries}
+            hint="Comma-separated, e.g. Hospitality, BFSI"
+            className="sm:col-span-2"
+          />
+          <SelectField name="delivery_mode" label="Delivery mode" required options={DELIVERY_MODES} defaultValue={profile.delivery_mode} error={fe.delivery_mode} />
+          <TextField name="languages" label="Languages" required defaultValue={profile.languages} error={fe.languages} hint="e.g. English, Hindi" className="sm:col-span-3" />
+          <TextField
+            name="bio"
+            label="Short bio"
+            required
+            multiline
+            rows={5}
+            maxLength={600}
+            defaultValue={profile.bio}
+            error={fe.bio}
+            hint="Up to about 80 words. Companies see this (without your name) when you match their request."
+            className="sm:col-span-3"
+          />
+        </fieldset>
+
+        <fieldset className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
+          <legend className="mb-6 font-serif text-2xl">More detail (optional)</legend>
+          <TextField name="linkedin_url" label="LinkedIn URL" type="url" defaultValue={profile.linkedin_url} error={fe.linkedin_url} />
+          <TextField name="certifications" label="Certifications" defaultValue={profile.certifications} hint="e.g. ICF-PCC, SHRM-CP" />
+          <TextField name="notable_clients" label="Notable clients" defaultValue={profile.notable_clients} hint="Only clients you may name." />
+          <TextField name="availability" label="Availability" defaultValue={profile.availability} hint="e.g. 6 days a month" />
+          <SelectField
+            name="day_rate_band"
+            label="Day rate range"
+            options={DAY_RATE_BANDS}
+            defaultValue={profile.day_rate_band}
+            error={fe.day_rate_band}
+            hint="Never shown to companies."
+          />
+        </fieldset>
+
+        <CheckboxField
+          name="consent"
+          defaultChecked={profile.consent}
+          error={fe.consent}
+          label="I agree that Axon Arbor may show my profile to client companies. Before an introduction, companies see it without my name, photo, LinkedIn or contact details."
         />
-        <div className="sm:col-span-2">
-          <PhotoField initialUrl={profile.photo_url} />
+
+        <FormMessage error={state.error} ok={state.ok} />
+        <div className="flex flex-wrap items-center gap-4">
+          <Button type="submit" name="intent" value="submit" arrow disabled={pending}>
+            {pending ? "Saving…" : "Save and submit for approval"}
+          </Button>
+          <Button type="submit" name="intent" value="save" variant="outline" disabled={pending}>
+            Save draft
+          </Button>
         </div>
-      </fieldset>
-
-      <fieldset className="grid gap-x-8 gap-y-7 sm:grid-cols-3">
-        <legend className="mb-6 font-serif text-2xl">Expertise</legend>
-        <SelectField name="expertise_1" label="Main expertise" required options={EXPERTISE} defaultValue={ex1} error={fe.expertise_1} />
-        <SelectField name="expertise_2" label="Expertise 2" options={EXPERTISE} defaultValue={ex2} placeholder="(optional)" />
-        <SelectField name="expertise_3" label="Expertise 3" options={EXPERTISE} defaultValue={ex3} placeholder="(optional)" />
-        <TextField
-          name="industries"
-          label="Industries worked with"
-          required
-          defaultValue={profile.industries}
-          error={fe.industries}
-          hint="Comma-separated, e.g. Hospitality, BFSI"
-          className="sm:col-span-2"
-        />
-        <SelectField name="delivery_mode" label="Delivery mode" required options={DELIVERY_MODES} defaultValue={profile.delivery_mode} error={fe.delivery_mode} />
-        <TextField name="languages" label="Languages" required defaultValue={profile.languages} error={fe.languages} hint="e.g. English, Hindi" className="sm:col-span-3" />
-        <TextField
-          name="bio"
-          label="Short bio"
-          required
-          multiline
-          rows={5}
-          maxLength={600}
-          defaultValue={profile.bio}
-          error={fe.bio}
-          hint="Up to about 80 words. Companies see this (without your name) when you match their request."
-          className="sm:col-span-3"
-        />
-      </fieldset>
-
-      <fieldset className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
-        <legend className="mb-6 font-serif text-2xl">More detail (optional)</legend>
-        <TextField name="linkedin_url" label="LinkedIn URL" type="url" defaultValue={profile.linkedin_url} error={fe.linkedin_url} />
-        <TextField name="certifications" label="Certifications" defaultValue={profile.certifications} hint="e.g. ICF-PCC, SHRM-CP" />
-        <TextField name="notable_clients" label="Notable clients" defaultValue={profile.notable_clients} hint="Only clients you may name." />
-        <TextField name="availability" label="Availability" defaultValue={profile.availability} hint="e.g. 6 days a month" />
-        <SelectField
-          name="day_rate_band"
-          label="Day rate range"
-          options={DAY_RATE_BANDS}
-          defaultValue={profile.day_rate_band}
-          error={fe.day_rate_band}
-          hint="Never shown to companies."
-        />
-      </fieldset>
-
-      <CheckboxField
-        name="consent"
-        defaultChecked={profile.consent}
-        error={fe.consent}
-        label="I agree that Axon Arbor may show my profile to client companies. Before an introduction, companies see it without my name, photo, LinkedIn or contact details."
-      />
-
-      <FormMessage error={state.error} ok={state.ok} />
-      <div className="flex flex-wrap items-center gap-4">
-        <Button type="submit" name="intent" value="submit" arrow disabled={pending}>
-          {pending ? "Saving…" : "Save and submit for approval"}
-        </Button>
-        <Button type="submit" name="intent" value="save" variant="outline" disabled={pending}>
-          Save draft
-        </Button>
-      </div>
-    </form>
+      </form>
+    </KeepValues>
   );
 }
 
@@ -184,29 +186,31 @@ export function RemovalButton() {
 export function CompanyProfileForm({ company }: { company: CompanyProfile }) {
   const [state, action, pending] = useActionState(saveCompanyProfile, initial);
   return (
-    <form action={action} className="space-y-8">
-      <div className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
-        <TextField name="company_name" label="Company name" required defaultValue={company.company_name} />
-        <TextField name="website" label="Website" type="url" defaultValue={company.website} />
-        <TextField name="industry" label="Industry" defaultValue={company.industry} />
-        <SelectField name="city" label="Head office" options={CITIES} defaultValue={company.city} />
-        <SelectField name="employee_count" label="Number of employees" options={EMPLOYEE_BANDS} defaultValue={company.employee_count} />
-        <TextField name="contact_name" label="Your name" required defaultValue={company.contact_name} />
-        <TextField name="contact_role" label="Your role" defaultValue={company.contact_role} />
-        <TextField name="phone" label="Phone" type="tel" defaultValue={company.phone} />
-      </div>
-      <FormMessage error={state.error} ok={state.ok} />
-      <Button type="submit" variant="outline" disabled={pending}>
-        {pending ? "Saving…" : "Save company details"}
-      </Button>
-    </form>
+    <KeepValues values={state.values}>
+      <form action={action} onSubmit={submitWithoutReset(action)} className="space-y-8">
+        <div className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
+          <TextField name="company_name" label="Company name" required defaultValue={company.company_name} />
+          <TextField name="website" label="Website" type="url" defaultValue={company.website} />
+          <TextField name="industry" label="Industry" defaultValue={company.industry} />
+          <SelectField name="city" label="Head office" options={CITIES} defaultValue={company.city} />
+          <SelectField name="employee_count" label="Number of employees" options={EMPLOYEE_BANDS} defaultValue={company.employee_count} />
+          <TextField name="contact_name" label="Your name" required defaultValue={company.contact_name} />
+          <TextField name="contact_role" label="Your role" defaultValue={company.contact_role} />
+          <TextField name="phone" label="Phone" type="tel" defaultValue={company.phone} />
+        </div>
+        <FormMessage error={state.error} ok={state.ok} />
+        <Button type="submit" variant="outline" disabled={pending}>
+          {pending ? "Saving…" : "Save company details"}
+        </Button>
+      </form>
+    </KeepValues>
   );
 }
 
 export function ChangePasswordForm() {
   const [state, action, pending] = useActionState(changePassword, initial);
   return (
-    <form action={action} className="max-w-md space-y-6">
+    <form action={action} onSubmit={submitWithoutReset(action)} className="max-w-md space-y-6">
       <TextField name="current_password" label="Current password" type="password" autoComplete="current-password" required />
       <TextField name="new_password" label="New password" type="password" autoComplete="new-password" required hint="At least 10 characters, with letters and numbers." />
       <FormMessage error={state.error} ok={state.ok} />

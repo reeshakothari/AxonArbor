@@ -19,7 +19,18 @@ import {
 import { createServiceClient } from "@/lib/supabase/admin";
 import { MEDIA_BUCKET } from "@/lib/supabase/config";
 
-export type FormState = { error: string | null; fieldErrors?: Record<string, string>; ok?: string };
+export type FormState = { error: string | null; fieldErrors?: Record<string, string>; ok?: string; values?: Record<string, string> };
+
+const SECRET_FIELDS = new Set(["password", "current_password", "new_password", "website_url", "intent"]);
+
+/** Sends typed values back with the result, so React's post-submit form reset doesn't wipe them. */
+function keep(form: FormData, result: FormState): FormState {
+  const values: Record<string, string> = {};
+  for (const [key, value] of form.entries()) {
+    if (typeof value === "string" && !SECRET_FIELDS.has(key) && !key.startsWith("$")) values[key] = value;
+  }
+  return { ...result, values };
+}
 
 const db = () => createServiceClient();
 const text = (form: FormData, key: string, max = 300) => String(form.get(key) ?? "").trim().slice(0, max);
@@ -37,7 +48,11 @@ async function emailTaken(email: string) {
 
 /* ---------- sign up ---------- */
 
-export async function signUpConsultant(_prev: FormState, form: FormData): Promise<FormState> {
+export async function signUpConsultant(prev: FormState, form: FormData): Promise<FormState> {
+  return keep(form, await signUpConsultantInner(prev, form));
+}
+
+async function signUpConsultantInner(_prev: FormState, form: FormData): Promise<FormState> {
   if (text(form, "website_url")) return { error: null }; // honeypot
   const fullName = text(form, "full_name", 120);
   const email = text(form, "email", 200).toLowerCase();
@@ -63,7 +78,11 @@ export async function signUpConsultant(_prev: FormState, form: FormData): Promis
   redirect("/account");
 }
 
-export async function signUpCompany(_prev: FormState, form: FormData): Promise<FormState> {
+export async function signUpCompany(prev: FormState, form: FormData): Promise<FormState> {
+  return keep(form, await signUpCompanyInner(prev, form));
+}
+
+async function signUpCompanyInner(_prev: FormState, form: FormData): Promise<FormState> {
   if (text(form, "website_url")) return { error: null }; // honeypot
   const values = {
     company_name: text(form, "company_name", 160),
@@ -116,7 +135,11 @@ export async function signUpCompany(_prev: FormState, form: FormData): Promise<F
 
 /* ---------- sign in / out ---------- */
 
-export async function signInAccount(_prev: FormState, form: FormData): Promise<FormState> {
+export async function signInAccount(prev: FormState, form: FormData): Promise<FormState> {
+  return keep(form, await signInAccountInner(prev, form));
+}
+
+async function signInAccountInner(_prev: FormState, form: FormData): Promise<FormState> {
   const email = text(form, "email", 200).toLowerCase();
   const password = String(form.get("password") ?? "");
   const { data } = await db()
@@ -205,7 +228,11 @@ function profileErrors(p: ReturnType<typeof readProfile>, submitting: boolean) {
 }
 
 /** intent: "save" keeps a draft; "submit" sends the profile to Axon Arbor for approval. */
-export async function saveConsultantProfile(_prev: FormState, form: FormData): Promise<FormState> {
+export async function saveConsultantProfile(prev: FormState, form: FormData): Promise<FormState> {
+  return keep(form, await saveConsultantProfileInner(prev, form));
+}
+
+async function saveConsultantProfileInner(_prev: FormState, form: FormData): Promise<FormState> {
   const account = await getCurrentAccount();
   if (!account || account.role !== "consultant") return { error: "Please sign in again." };
   const current = await getConsultantProfile(account.id);
@@ -263,7 +290,11 @@ export async function createProfilePhotoUpload(file: { type: string; size: numbe
 
 /* ---------- company profile ---------- */
 
-export async function saveCompanyProfile(_prev: FormState, form: FormData): Promise<FormState> {
+export async function saveCompanyProfile(prev: FormState, form: FormData): Promise<FormState> {
+  return keep(form, await saveCompanyProfileInner(prev, form));
+}
+
+async function saveCompanyProfileInner(_prev: FormState, form: FormData): Promise<FormState> {
   const account = await getCurrentAccount();
   if (!account || account.role !== "company") return { error: "Please sign in again." };
   const companyName = text(form, "company_name", 160);
