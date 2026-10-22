@@ -56,7 +56,7 @@ export const contentPages: {
   { key: "hospitality", title: "The Hospitality Vertical", description: "Luxury, hotels and restaurants, retail.", path: "/hospitality" },
   { key: "about", title: "About Us", description: "Founder, advisors, facilitators and partners.", path: "/about" },
   { key: "contact", title: "Contact Us", description: "Form labels, messages and contact panel.", path: "/contact" },
-  { key: "sign-in", title: "Sign-in page", description: "The “coming soon” sign-in placeholder.", path: "/sign-in" },
+  { key: "sign-in", title: "Sign-in page", description: "The sign-in page for consultants and companies.", path: "/sign-in" },
 ];
 
 export function isContentKey(value: string): value is ContentKey {

@@ -39,14 +39,14 @@ export const contact: ContactContent = {
 export const signIn: SignInContent = {
   meta: {
     title: "Sign in",
-    description: "Client and consultant dashboards are coming soon.",
+    description: "Sign in to your Axon Arbor consultant or company account.",
     path: "/sign-in",
   },
   header: {
-    eyebrow: "Coming soon",
-    heading: "Dashboards are on their way.",
-    lede: "Soon, consultants and client organisations will be able to sign in here to follow programmes, people and impact in one place.",
+    eyebrow: "Sign in",
+    heading: "Welcome back.",
+    lede: "Consultants and client organisations sign in here to manage their profile and account.",
   },
-  button: { label: "Back to home", href: "/" },
-  helpText: "Need access sooner? Email us and we’ll set you up.",
+  button: { label: "Sign in", href: "/account" },
+  helpText: "Forgotten your password? Email us and we’ll reset it for you:",
 };
