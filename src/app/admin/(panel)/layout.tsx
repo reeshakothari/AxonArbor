@@ -13,12 +13,12 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const [unpublished, newEnquiries, pendingApprovals] = await Promise.all([
     getUnpublishedKeys(session).catch((): ContentKey[] => []),
     countNewSubmissions(session).catch(() => 0),
-    countPendingApprovals(session).catch(() => 0),
+    countPendingApprovals(session).catch(() => ({ consultants: 0, companies: 0 })),
   ]);
   const changedPages = contentPages.filter((p) => unpublished.includes(p.key)).map((p) => p.title);
 
   return (
-    <AdminShell email={session.user.name} changedPages={changedPages} newEnquiries={newEnquiries} pendingApprovals={pendingApprovals}>
+    <AdminShell email={session.user.name} changedPages={changedPages} newEnquiries={newEnquiries} pending={pendingApprovals}>
       {children}
     </AdminShell>
   );

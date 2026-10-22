@@ -1,5 +1,6 @@
 import "server-only";
 import type { AdminSession } from "@/lib/admin/auth";
+import type { AccountRole } from "./session";
 import { ACCOUNT_TABLES, type Account, type CompanyProfile, type ConsultantProfile } from "./data";
 
 export type AdminAccountRow = Account & {
@@ -23,8 +24,8 @@ export async function getAllAccounts({ supabase }: AdminSession): Promise<AdminA
   return (accounts.data as Account[]).map((a) => ({ ...a, consultant: c.get(a.id) ?? null, company: co.get(a.id) ?? null }));
 }
 
-/** Items waiting for an admin decision: new companies, submitted profiles and removal requests. */
-export async function countPendingApprovals({ supabase }: AdminSession): Promise<number> {
+/** Items waiting for an admin decision: new companies, and submitted profiles or removal requests from consultants. */
+export async function countPendingApprovals({ supabase }: AdminSession): Promise<{ consultants: number; companies: number }> {
   const [companies, profiles] = await Promise.all([
     supabase.from(ACCOUNT_TABLES.accounts).select("id", { count: "exact", head: true }).eq("role", "company").eq("status", "pending"),
     supabase
@@ -32,5 +33,9 @@ export async function countPendingApprovals({ supabase }: AdminSession): Promise
       .select("account_id", { count: "exact", head: true })
       .in("profile_status", ["pending", "removal_requested"]),
   ]);
-  return (companies.count ?? 0) + (profiles.count ?? 0);
+  return { consultants: profiles.count ?? 0, companies: companies.count ?? 0 };
+}
+
+export async function getAccountsByRole(session: AdminSession, role: AccountRole): Promise<AdminAccountRow[]> {
+  return (await getAllAccounts(session)).filter((a) => a.role === role);
 }

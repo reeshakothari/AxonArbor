@@ -8,12 +8,29 @@ import type { AdminAccountRow } from "@/lib/accounts/admin";
 import type { ProfileStatus } from "@/lib/accounts/data";
 import { AdminButton, ConfirmDialog, formatDate, Toast } from "./ui";
 
-const TABS = [
-  { value: "review", label: "To review" },
-  { value: "consultants", label: "Consultants" },
-  { value: "companies", label: "Companies" },
-] as const;
-type Tab = (typeof TABS)[number]["value"];
+type Tab = "review" | "active" | "waiting" | "all";
+
+const TABS: Record<"consultant" | "company", { value: Tab; label: string }[]> = {
+  consultant: [
+    { value: "review", label: "To review" },
+    { value: "active", label: "Live" },
+    { value: "waiting", label: "Not submitted yet" },
+    { value: "all", label: "All" },
+  ],
+  company: [
+    { value: "review", label: "To review" },
+    { value: "active", label: "Approved" },
+    { value: "all", label: "All" },
+  ],
+};
+
+function inTab(r: AdminAccountRow, tab: Tab) {
+  if (tab === "all") return true;
+  if (tab === "review") return needsReview(r);
+  const ps = r.consultant?.profile_status;
+  if (tab === "active") return r.status !== "suspended" && (r.role === "company" ? r.status === "approved" : ps === "live");
+  return r.role === "consultant" && (ps === "draft" || ps === "changes_requested");
+}
 
 const PROFILE_LABEL: Record<ProfileStatus, string> = {
   draft: "Not submitted",
@@ -121,7 +138,8 @@ function Details({ row }: { row: AdminAccountRow }) {
   );
 }
 
-export function ApprovalsBoard({ rows }: { rows: AdminAccountRow[] }) {
+export function ApprovalsBoard({ rows, role }: { rows: AdminAccountRow[]; role: "consultant" | "company" }) {
+  const tabs = TABS[role];
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("review");
   const [query, setQuery] = useState("");
@@ -132,20 +150,14 @@ export function ApprovalsBoard({ rows }: { rows: AdminAccountRow[] }) {
   const [toast, setToast] = useState<{ message: string; tone: "info" | "error" } | null>(null);
   const [tempPassword, setTempPassword] = useState<{ email: string; password: string } | null>(null);
 
-  const counts = {
-    review: rows.filter(needsReview).length,
-    consultants: rows.filter((r) => r.role === "consultant").length,
-    companies: rows.filter((r) => r.role === "company").length,
-  };
+  const counts = Object.fromEntries(tabs.map((t) => [t.value, rows.filter((r) => inTab(r, t.value)).length])) as Record<Tab, number>;
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return rows.filter((r) => {
-      if (tab === "review" && !needsReview(r)) return false;
-      if (tab === "consultants" && r.role !== "consultant") return false;
-      if (tab === "companies" && r.role !== "company") return false;
+      if (!inTab(r, tab)) return false;
       if (!q) return true;
-      return [r.email, name(r), r.consultant?.city, r.company?.industry, ...(r.consultant?.expertise ?? [])].some((v) => v?.toLowerCase().includes(q));
+      return [r.email, name(r), r.consultant?.city, r.company?.industry, r.company?.contact_name, ...(r.consultant?.expertise ?? [])].some((v) => v?.toLowerCase().includes(q));
     });
   }, [rows, tab, query]);
 
@@ -183,8 +195,8 @@ export function ApprovalsBoard({ rows }: { rows: AdminAccountRow[] }) {
   return (
     <div className="mt-8">
       <div className="flex flex-wrap items-center gap-3">
-        <div role="tablist" aria-label="Filter accounts" className="flex border border-grey-200 bg-paper">
-          {TABS.map((t) => (
+        <div role="tablist" aria-label={role === "consultant" ? "Filter consultants" : "Filter companies"} className="flex border border-grey-200 bg-paper">
+          {tabs.map((t) => (
             <button
               key={t.value}
               role="tab"
@@ -201,7 +213,7 @@ export function ApprovalsBoard({ rows }: { rows: AdminAccountRow[] }) {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search name, email, expertise…"
+          placeholder={role === "consultant" ? "Search name, email, expertise, city…" : "Search company, contact, email, industry…"}
           aria-label="Search accounts"
           className="min-w-56 flex-1 border border-grey-200 bg-paper px-4 py-2 text-sm focus:border-ink focus:outline-none"
         />
@@ -209,7 +221,11 @@ export function ApprovalsBoard({ rows }: { rows: AdminAccountRow[] }) {
 
       {visible.length === 0 ? (
         <div className="mt-6 border border-dashed border-grey-300 bg-paper px-6 py-16 text-center text-grey-600">
-          {tab === "review" ? "Nothing waiting for approval. New sign-ups and profile changes will appear here." : "No accounts yet."}
+          {tab === "review"
+            ? role === "consultant"
+              ? "No profiles waiting. Submitted profiles and removal requests will appear here."
+              : "No companies waiting. New registrations will appear here."
+            : "Nothing here yet."}
         </div>
       ) : (
         <ul className="mt-6 space-y-3">
@@ -227,7 +243,7 @@ export function ApprovalsBoard({ rows }: { rows: AdminAccountRow[] }) {
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{name(r)}</span>
                     <span className="block truncate text-sm text-grey-500">
-                      {r.role === "consultant" ? "Consultant" : "Company"} · {r.email}
+                      {r.role === "consultant" ? (r.consultant?.expertise.slice(0, 2).join(", ") || "No expertise yet") : (r.company?.contact_name ?? "")} · {r.email}
                     </span>
                   </span>
                   <Badge strong={needsReview(r)}>{statusLabel(r)}</Badge>
